@@ -1,9 +1,10 @@
 import random
 import copy
 
-POOL_SIZE = 10
-MUTATE_CHANCE = 0.3
-ROULETTE_FACTOR = 0.6
+POOL_SIZE = 100
+MUTATE_CHANCE = 1/128
+EVAL_AVERAGE_NUM = 10
+ROULETTE_FACTOR = 0.7
 ACTIONS = ["UP", "RIGHT", "DOWN", "LEFT", "FIX", "RAN", "WAIT"]
 FIX_BROKEN_BONUS = 10
 FIX_UNBROKEN_PENALTY = -1
@@ -20,10 +21,8 @@ def recursiveGene(x):
     for item in l:
         temp = item.copy()
         temp2 = item.copy()
-
         temp.append("X")
         new.append(temp)
-
         temp2.append("O")
         new.append(temp2)
     return new
@@ -73,11 +72,9 @@ def randomFillGenome():
     genes = createBlankGenome()
     genome = {}
     for gene in genes:
-        action = random.choice(ACTIONS)
-        genome[gene] = action
+        genome[gene] = random.choice(ACTIONS)
     return genome
     
-
 
 def convertListToString(l):
     newList = []
@@ -97,19 +94,24 @@ class Fountain:
         self.map = self.createMap()
         self.robotPos = (1,1)
 
-    def evalutate(self, robot):
-        fitness = 0
-        self.robotPos = (1,1)
-        map = self.map[:]
-        for i in range(0,200): # 200 is the number of actions a robot can take
-            x, y = self.robotPos
-            env = self.getEnvironment()
-            action = robot.getAction(env)
-            self.printState(action, fitness)
-            input("Press a key....")
-           
-            fitness += self.applyAction(action)
-        return fitness
+    def evaluate(self, robot):
+        finalFitness = 0
+        for i in range(EVAL_AVERAGE_NUM):
+            fitness = 0
+            self.robotPos = (1,1)
+            map = self.map[:]
+            for i in range(0,200): # 200 is the number of actions a robot can take
+                x, y = self.robotPos
+                env = self.getEnvironment()
+                action = robot.getAction(env)
+                # self.printState(action, fitness)
+                # print(i)
+                # input("Press a key....")
+            
+                fitness += self.applyAction(action)
+            finalFitness += fitness
+        finalFitness /= EVAL_AVERAGE_NUM
+        return finalFitness
 
 
     def printState(self, action, fitness):
@@ -162,7 +164,7 @@ class Fountain:
 
     def left(self):
         x,y = self.robotPos
-        if y == 1:
+        if x == 1:
             return FALL_OFF_PENALTY
         self.robotPos = (x-1,y)
         return 0
@@ -227,11 +229,12 @@ class Robot:
     def crossover(self, mate):
         split1 = random.randrange(0,128)
         split2 = random.randrange(0,128)
+        # print("split 1: {0} | split 2: {1}".format(split1,split2))
         possibleEnvs = createBlankGenome()
         
         newGenome = {}
         for i in range(0,128):
-            if i < min(spit1, split2): # Take genes from parent 1
+            if i <= min(split1, split2): # Take genes from parent 1
                 env = possibleEnvs[i]
                 action = self.getAction(env)
                 newGenome[env] = action
@@ -239,17 +242,22 @@ class Robot:
                 env = possibleEnvs[i]
                 action = mate.getAction(env)
                 newGenome[env] = action 
-            elif max(split1, split2) < i:
+            elif max(split1, split2) <= i:
                 env = possibleEnvs[i]
                 action = self.getAction(env)
                 newGenome[env] = action  
-
         return Robot(newGenome)
 
     def mutate(self):
         possibleEnvs = createBlankGenome()
+        i = 0
         for env in possibleEnvs:
-            if random.uniform(0,1) > MUTATE_CHANCE
+            i += 1
+            if random.uniform(0,1) < MUTATE_CHANCE:
+                action = random.choice(ACTIONS)
+                self.genome[env] = action
+                # print("Mutating: {0} -> {1}| {2}".format(env, action, i))
+               
 
 
 class GenePool:
@@ -259,21 +267,36 @@ class GenePool:
         self.weights = [1]
         for i in range(1, len(robots)):
             self.weights.append(self.weights[i-1] * ROULETTE_FACTOR)
+        self.latest = self.robots[-1].fitness
         self.best = self.test()
+        
 
     def select_parents(self,num=2):
         return random.choices(self.robots,self.weights, k=num)
 
     def test(self):
-        self.env.evalutate(self.robots[0])
-        # self.robots.sort(key = lambda x: x.fitness)
+        # for robot in self.robots:
+        #     f = Fountain()
+        #     robot.fitness = f.evaluate(robot)
+        self.robots.sort(key = lambda x: x.fitness, reverse = True) # Reverse = true to sort in decending order
+        return self.robots[0]
 
     def nextGen(self):
-        return []
+        r1, r2 = self.select_parents()
+        r3 = r1.crossover(r2)
+        r3.mutate()
+        f = Fountain()
+        r3.fitness = f.evaluate(r3)
+        robots = self.robots[:]
+        robots[-1] = r3
+        return GenePool(robots)
 
 
 
-
+def writeToFile(genome, path):
+    with open(path, "w") as f:
+        for key in genome:
+            f.write(key +","+genome[key] +"\n") 
 
 
 def main():
@@ -283,6 +306,21 @@ def main():
         robots.append(Robot(genome))
     
     pool = GenePool(robots)
+    i = 0
+    currentBest = 0
+    while (True):
+        if currentBest < pool.best.fitness:
+            currentBest = pool.best.fitness
+        latest = pool.latest
+        print("Gen: {0} | currentBest {1} | newest {2}".format(i, currentBest, latest))
+        
+        # for robot in pool.robots:
+        #     print(robot.fitness)
+        # if i%1000 == 0:
+        #     writeToFile(pool.best.genome, "/home/lucas/Documents/cpsc565/assignment3/Gen{0}.txt".format(i))
+        pool = pool.nextGen()
+        i += 1
+
     
 if __name__ == "__main__":
     main()
