@@ -12,7 +12,7 @@
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [redResources blueResources greyResources validSpots]
+globals [validSpots]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
@@ -26,7 +26,7 @@ turtles-own [ wood brick wheat sheep vPoints]
 patches-own [ probability resourceType ]
 
 to setup
-
+ca
   setup-patches
   setup-turtles
 
@@ -74,106 +74,263 @@ to-report playerSurroundings ;surroundings of the players' settlement
 
   report listofpatches
 end
+;fixed game board creation
 to setup-patches
- clear-patches
   set validSpots []
  ask patches [
     if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor black]
-    if (((pxcor > 4) or (pxcor < -4)) or ((pycor > 4) or (pycor < -4))) [ set pcolor sky]
+    if (((pxcor > 12) or (pxcor < -12)) or ((pycor > 12) or (pycor < -12))) [ set pcolor sky]
     ;fixed game board
     ;1st row
+    if ((pxcor = -12) and (pycor = 12))  [ set pcolor orange set probability 0]
+    if ((pxcor = -10) and (pycor = 12))  [ set pcolor green set probability 0]
+    if ((pxcor = -8) and (pycor = 12))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = 12))  [ set pcolor orange set probability 0]
+    if ((pxcor = -4) and (pycor = 12))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -2) and (pycor = 12))  [ set pcolor green set probability 0]
+    if ((pxcor = 0) and (pycor = 12))  [ set pcolor white set probability 0]
+    if ((pxcor = 2) and (pycor = 12))  [ set pcolor orange set probability 0]
+    if ((pxcor = 4) and (pycor = 12))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = 12))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = 12))  [ set pcolor green set probability 0]
+    if ((pxcor = 10) and (pycor = 12))  [ set pcolor white set probability 0]
+    if ((pxcor = 12) and (pycor = 12))  [ set pcolor white set probability 0]
+    ;2nd row
+    if ((pxcor = -12) and (pycor = 10))  [ set pcolor green set probability 0]
+    if ((pxcor = -10) and (pycor = 10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -8) and (pycor = 10))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = 10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -4) and (pycor = 10))  [ set pcolor white set probability 0]
+    if ((pxcor = -2) and (pycor = 10))  [ set pcolor orange set probability 0]
+    if ((pxcor = 0) and (pycor = 10))  [ set pcolor white set probability 0]
+    if ((pxcor = 2) and (pycor = 10))  [ set pcolor green set probability 0]
+    if ((pxcor = 4) and (pycor = 10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = 10))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = 10))  [ set pcolor white set probability 0]
+    if ((pxcor = 10) and (pycor = 10))  [ set pcolor orange set probability 0]
+    if ((pxcor = 12) and (pycor = 10))  [ set pcolor green set probability 0]
+    ;3rd row
+    if ((pxcor = -12) and (pycor = 8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -10) and (pycor = 8))  [ set pcolor white set probability 0]
+    if ((pxcor = -8) and (pycor = 8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -6) and (pycor = 8))  [ set pcolor orange set probability 0]
+    if ((pxcor = -4) and (pycor = 8))  [ set pcolor orange set probability 0]
+    if ((pxcor = -2) and (pycor = 8))  [ set pcolor green set probability 0]
+    if ((pxcor = 0) and (pycor = 8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 2) and (pycor = 8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 4) and (pycor = 8))  [ set pcolor green set probability 0]
+    if ((pxcor = 6) and (pycor = 8))  [ set pcolor white set probability 0]
+    if ((pxcor = 8) and (pycor = 8))  [ set pcolor green set probability 0]
+    if ((pxcor = 10) and (pycor = 8))  [ set pcolor green set probability 0]
+    if ((pxcor = 12) and (pycor = 8))  [ set pcolor white set probability 0]
+    ;4th row
+    if ((pxcor = -12) and (pycor = 6))  [ set pcolor white set probability 0]
+    if ((pxcor = -10) and (pycor = 6))  [ set pcolor white set probability 0]
+    if ((pxcor = -8) and (pycor = 6))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = 6))  [ set pcolor orange set probability 0]
+    if ((pxcor = -4) and (pycor = 6))  [ set pcolor green set probability 0]
+    if ((pxcor = -2) and (pycor = 6))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 0) and (pycor = 6))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 2) and (pycor = 6))  [ set pcolor green set probability 0]
+    if ((pxcor = 4) and (pycor = 6))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = 6))  [ set pcolor orange set probability 0]
+    if ((pxcor = 8) and (pycor = 6))  [ set pcolor orange set probability 0]
+    if ((pxcor = 10) and (pycor = 6))  [ set pcolor green set probability 0]
+    if ((pxcor = 12) and (pycor = 6))  [ set pcolor green set probability 0]
+    ;5th row
+    if ((pxcor = -12) and (pycor = 4))  [ set pcolor green set probability 0]
+    if ((pxcor = -10) and (pycor = 4))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -8) and (pycor = 4))  [ set pcolor white set probability 0]
+    if ((pxcor = -6) and (pycor = 4))  [ set pcolor orange set probability 0]
     if ((pxcor = -4) and (pycor = 4))  [ set pcolor green set probability 11]
-    if ((pxcor = -2) and (pycor = 4))  [ set pcolor red set probability 10] ;;;;
+    if ((pxcor = -2) and (pycor = 4))  [ set pcolor green set probability 10]
     if ((pxcor = 0) and (pycor = 4))  [ set pcolor white set probability 2]
     if ((pxcor = 2) and (pycor = 4))  [ set pcolor orange set probability 7]
     if ((pxcor = 4) and (pycor = 4))  [ set pcolor yellow set probability 7]
-    ;2nd row
+    if ((pxcor = 6) and (pycor = 4))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = 4))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 10) and (pycor = 4))  [ set pcolor white set probability 0]
+    if ((pxcor = 12) and (pycor = 4))  [ set pcolor orange set probability 0]
+    ;6th row
+    if ((pxcor = -12) and (pycor = 2))  [ set pcolor orange set probability 0]
+    if ((pxcor = -10) and (pycor = 2))  [ set pcolor white set probability 0]
+    if ((pxcor = -8) and (pycor = 2))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -6) and (pycor = 2))  [ set pcolor green set probability 0]
     if ((pxcor = -4) and (pycor = 2))  [ set pcolor yellow set probability 6]
     if ((pxcor = -2) and (pycor = 2))  [ set pcolor orange set probability 10]
     if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set probability 6]
     if ((pxcor = 2) and (pycor = 2))  [ set pcolor green set probability 8]
     if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set probability 7]
-    ;3rd row
+    if ((pxcor = 6) and (pycor = 2))  [ set pcolor orange set probability 0]
+    if ((pxcor = 8) and (pycor = 2))  [ set pcolor white set probability 0]
+    if ((pxcor = 10) and (pycor = 2))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 12) and (pycor = 2))  [ set pcolor green set probability 0]
+    ;7th row
+    if ((pxcor = -12) and (pycor = 0))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -10) and (pycor = 0))  [ set pcolor green set probability 0]
+    if ((pxcor = -8) and (pycor = 0))  [ set pcolor orange set probability 0]
+    if ((pxcor = -6) and (pycor = 0))  [ set pcolor orange set probability 0]
     if ((pxcor = -4) and (pycor = 0))  [ set pcolor green set probability 5]
     if ((pxcor = -2) and (pycor = 0))  [ set pcolor brown ] ;desert tile
     if ((pxcor = 0) and (pycor = 0))  [ set pcolor green set probability 3]
     if ((pxcor = 2) and (pycor = 0))  [ set pcolor white set probability 9]
     if ((pxcor = 4) and (pycor = 0))  [ set pcolor yellow set probability 4]
-    ;4th row
+    if ((pxcor = 6) and (pycor = 0))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = 0))  [ set pcolor white set probability 0]
+    if ((pxcor = 10) and (pycor = 0))  [ set pcolor green set probability 0]
+    if ((pxcor = 12) and (pycor = 0))  [ set pcolor orange set probability 0]
+    ;8th row
+    if ((pxcor = -12) and (pycor = -2))  [ set pcolor white set probability 0]
+    if ((pxcor = -10) and (pycor = -2))  [ set pcolor green set probability 0]
+    if ((pxcor = -8) and (pycor = -2))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = -2))  [ set pcolor orange set probability 0]
     if ((pxcor = -4) and (pycor = -2))  [ set pcolor white set probability 3]
     if ((pxcor = -2) and (pycor = -2))  [ set pcolor yellow set probability 4]
     if ((pxcor = 0) and (pycor = -2))  [ set pcolor orange set probability 5]
     if ((pxcor = 2) and (pycor = -2))  [ set pcolor green set probability 11]
     if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set probability 7]
-    ;5th row
+    if ((pxcor = 6) and (pycor = -2))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = -2))  [ set pcolor green set probability 0]
+    if ((pxcor = 10) and (pycor = -2))  [ set pcolor orange set probability 0]
+    if ((pxcor = 12) and (pycor = -2))  [ set pcolor yellow set probability 0]
+    ;9th row
+    if ((pxcor = -12) and (pycor = -4))  [ set pcolor orange set probability 0]
+    if ((pxcor = -10) and (pycor = -4))  [ set pcolor white set probability 0]
+    if ((pxcor = -8) and (pycor = -4))  [ set pcolor white set probability 0]
+    if ((pxcor = -6) and (pycor = -4))  [ set pcolor green set probability 0]
     if ((pxcor = -4) and (pycor = -4))  [ set pcolor orange set probability 8]
     if ((pxcor = -2) and (pycor = -4))  [ set pcolor white set probability 12]
     if ((pxcor = 0) and (pycor = -4))  [ set pcolor yellow set probability 9]
     if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set probability 7]
-    if ((pxcor = 4) and (pycor = -4))  [ set pcolor green set probability 7]
+    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set probability 7]
+    if ((pxcor = 6) and (pycor = -4))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 8) and (pycor = -4))  [ set pcolor green set probability 0]
+    if ((pxcor = 10) and (pycor = -4))  [ set pcolor white set probability 0]
+    if ((pxcor = 12) and (pycor = -4))  [ set pcolor orange set probability 0]
+    ;10th row
+    if ((pxcor = -12) and (pycor = -6))  [ set pcolor white set probability 0]
+    if ((pxcor = -10) and (pycor = -6))  [ set pcolor white set probability 0]
+    if ((pxcor = -8) and (pycor = -6))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = -6))  [ set pcolor white set probability 0]
+    if ((pxcor = -4) and (pycor = -6))  [ set pcolor green set probability 0]
+    if ((pxcor = -2) and (pycor = -6))  [ set pcolor green set probability 0]
+    if ((pxcor = 0) and (pycor = -6))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 2) and (pycor = -6))  [ set pcolor orange set probability 0]
+    if ((pxcor = 4) and (pycor = -6))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = -6))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = -6))  [ set pcolor white set probability 0]
+    if ((pxcor = 10) and (pycor = -6))  [ set pcolor white set probability 0]
+    if ((pxcor = 12) and (pycor = -6))  [ set pcolor green set probability 0]
+    ;11th row
+    if ((pxcor = -12) and (pycor = -8))  [ set pcolor green set probability 0]
+    if ((pxcor = -10) and (pycor = -8))  [ set pcolor green set probability 0]
+    if ((pxcor = -8) and (pycor = -8))  [ set pcolor green set probability 0]
+    if ((pxcor = -6) and (pycor = -8))  [ set pcolor white set probability 0]
+    if ((pxcor = -4) and (pycor = -8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -2) and (pycor = -8))  [ set pcolor green set probability 0]
+    if ((pxcor = 0) and (pycor = -8))  [ set pcolor white set probability 0]
+    if ((pxcor = 2) and (pycor = -8))  [ set pcolor orange set probability 0]
+    if ((pxcor = 4) and (pycor = -8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = -8))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = -8))  [ set pcolor orange set probability 0]
+    if ((pxcor = 10) and (pycor = -8))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 12) and (pycor = -8))  [ set pcolor yellow set probability 0]
+    ;12th row
+    if ((pxcor = -12) and (pycor = -10))  [ set pcolor orange set probability 0]
+    if ((pxcor = -10) and (pycor = -10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -8) and (pycor = -10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -6) and (pycor = -10))  [ set pcolor white set probability 0]
+    if ((pxcor = -4) and (pycor = -10))  [ set pcolor orange set probability 0]
+    if ((pxcor = -2) and (pycor = -10))  [ set pcolor green set probability 0]
+    if ((pxcor = 0) and (pycor = -10))  [ set pcolor orange set probability 0]
+    if ((pxcor = 2) and (pycor = -10))  [ set pcolor green set probability 0]
+    if ((pxcor = 4) and (pycor = -10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 6) and (pycor = -10))  [ set pcolor white set probability 0]
+    if ((pxcor = 8) and (pycor = -10))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 10) and (pycor = -10))  [ set pcolor green set probability 0]
+    if ((pxcor = 12) and (pycor = -10))  [ set pcolor white set probability 0]
+    ;13th row
+    if ((pxcor = -12) and (pycor = -12))  [ set pcolor white set probability 0]
+    if ((pxcor = -10) and (pycor = -12))  [ set pcolor green set probability 0]
+    if ((pxcor = -8) and (pycor = -12))  [ set pcolor orange set probability 0]
+    if ((pxcor = -6) and (pycor = -12))  [ set pcolor green set probability 0]
+    if ((pxcor = -4) and (pycor = -12))  [ set pcolor yellow set probability 0]
+    if ((pxcor = -2) and (pycor = -12))  [ set pcolor yellow set probability 0]
+    if ((pxcor = 0) and (pycor = -12))  [ set pcolor white set probability 0]
+    if ((pxcor = 2) and (pycor = -12))  [ set pcolor orange set probability 0]
+    if ((pxcor = 4) and (pycor = -12))  [ set pcolor green set probability 0]
+    if ((pxcor = 6) and (pycor = -12))  [ set pcolor green set probability 0]
+    if ((pxcor = 8) and (pycor = -12))  [ set pcolor white set probability 0]
+    if ((pxcor = 10) and (pycor = -12))  [ set pcolor orange set probability 0]
+    if ((pxcor = 12) and (pycor = -12))  [ set pcolor orange set probability 0]
 
     ; probably needs to be moved, currently only gives all spots including those
     ; taken by an initial settlement. Each player probably needs to have a separate list
 
-    if ((not (pxcor mod 2 = 0)) and (not (pycor mod 2 = 0)) and ((pxcor < 4)
-      and (pycor < 4)) and ((pxcor > -4) and (pycor > -4))) [
+    if ((not (pxcor mod 2 = 0)) and (not (pycor mod 2 = 0)) and ((pxcor < 12)
+      and (pycor < 12)) and ((pxcor > -12) and (pycor > -12))) [
       set validSpots lput (list pxcor pycor) validSpots]
   ]
 end
 
 to setup-turtles
-  clear-turtles
    create-player1 1
   [
-    set redResources []
     set shape "house"
     set color red
     set vPoints 0
-    setxy -1 3
+    setxy -9 9 ;starting position
     ask player1 [
       foreach playerSurroundings [ [resource] -> ;gives out initial resources (is this a rule? i forgot)
-        if(resource = "green") [set redResources lput "wood" redResources]
-        if(resource = "orange") [set redResources lput "brick" redResources]
-        if(resource = "yellow") [set redResources lput "wheat" redResources]
-        if(resource = "white") [set redResources lput "sheep" redResources]
+         if(resource = "green") [set wood wood + 1]
+        if(resource = "orange") [set brick brick + 1]
+        if(resource = "yellow") [set wheat wheat + 1]
+        if(resource = "white") [set sheep sheep + 1]
       ]
     ]
-    show redResources ;for debugging
+    show wood  ;for debugging
+    show brick
+    show wheat
+    show sheep
   ]
 
   create-player2 1
   [
-    set blueResources []
     set shape "house"
     set color blue
     set vPoints 0
-    setxy -3 -3
+    setxy -5 -7 ;starting position
     ask player2 [
       foreach playerSurroundings [ [resource] ->
-        if(resource = "green") [set blueResources lput "wood" blueResources]
-        if(resource = "orange") [set blueResources lput "brick" blueResources]
-        if(resource = "yellow") [set blueResources lput "wheat" blueResources]
-        if(resource = "white") [set blueResources lput "sheep" blueResources]
+        if(resource = "green") [set wood wood + 1]
+        if(resource = "orange") [set brick brick + 1]
+        if(resource = "yellow") [set wheat wheat + 1]
+        if(resource = "white") [set sheep sheep + 1]
       ]
     ]
-    show blueResources ;for debugging
+    show wood  ;for debugging
+    show brick
+    show wheat
+    show sheep
   ]
   create-player3 1
   [
-    set greyResources []
     set shape "house"
     set color grey
     set vPoints 0
-    setxy 3 -1
+    setxy 9 -1 ;starting position
     ask player3 [
       foreach playerSurroundings [ [resource] ->
-        if(resource = "green") [set greyResources lput "wood" greyResources]
-        if(resource = "orange") [set greyResources lput "brick" greyResources]
-        if(resource = "yellow") [set greyResources lput "wheat" greyResources]
-        if(resource = "white") [set greyResources lput "sheep" greyResources]
+         if(resource = "green") [set wood wood + 1]
+        if(resource = "orange") [set brick brick + 1]
+        if(resource = "yellow") [set wheat wheat + 1]
+        if(resource = "white") [set sheep sheep + 1]
       ]
     ]
-    show greyResources ;for debugging
+    show wood  ;for debugging
+    show brick
+    show wheat
+    show sheep
   ]
 end
 
@@ -197,11 +354,11 @@ end
 GRAPHICS-WINDOW
 342
 10
-710
-379
+888
+557
 -1
 -1
-32.8
+20.0
 1
 10
 1
@@ -211,10 +368,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--5
-5
--5
-5
+-13
+13
+-13
+13
 0
 0
 1
