@@ -26,11 +26,12 @@ turtles-own [ wood brick wheat sheep vPoints]
 patches-own [ probability resourceType ]
 
 to setup
-c
+ca
   setup-patches
   setup-turtles
-
+  display-labels
 end
+
 to-report playerSurroundings ;surroundings of the players' settlement
 
   let listofpatches []
@@ -335,12 +336,51 @@ to setup-turtles
 end
 
 
+
+
 ; This is where the dice rolls and the player turns will happen
 to go
+  let roll random 6 + random 6
+  show roll
   ask patches [
-    if pcolor = red [
+    if probability = roll [
+       give-resources
+       show pcolor
+    ]
+  ]
+
+  display-labels
+end
+
+to give-resources
+  if pcolor = green [
       ask neighbors [
-        show turtles-here
+        ask turtles-here [set wood wood + 1]
+      ]
+    ]
+  if pcolor = orange [
+    ask neighbors [
+      ask turtles-here [set brick brick + 1]
+    ]
+  ]
+  if pcolor = yellow [
+      ask neighbors [
+        ask turtles-here [set wheat wheat + 1]
+      ]
+    ]
+  if pcolor = white [
+      ask neighbors [
+        ask turtles-here [set sheep sheep + 1]
+      ]
+    ]
+end
+
+to display-labels
+  ask patches [ set plabel "" ]
+  if show-value? [
+    ask patches [
+      if pcolor != black or pcolor ![
+        set plabel probability
       ]
     ]
   ]
@@ -354,11 +394,11 @@ end
 GRAPHICS-WINDOW
 342
 10
-710
-379
+890
+559
 -1
 -1
-32.8
+20.0
 1
 10
 1
@@ -368,10 +408,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--5
-5
--5
-5
+-13
+13
+-13
+13
 0
 0
 1
@@ -466,6 +506,17 @@ R Vic-points
 17
 1
 11
+
+SWITCH
+90
+270
+242
+303
+show-value?
+show-value?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
