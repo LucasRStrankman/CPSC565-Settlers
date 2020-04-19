@@ -349,12 +349,49 @@ to-report has-settlement-resources
   ]
 end
 
+
+
 ; This is where the dice rolls and the player turns will happen
 to go
-  roll-dice
-  display-labels
+  display-labels ; get the patches to display their prob-values
+  roll-dice ;Rolls dice and gives resources
+ ; try-build
 end
 
+; Checks of a road can be built on
+to-report is-valid-road
+    if (pcolor != black) [ ; out of bounds or other road there
+    report false
+  ]
+end
+
+; Checks if a settlement can be built
+to-report is-valid-settlement
+  if (pcolor != black) [ ; out of bounds or other road there
+    report false
+  ]
+
+  ; There is already a settlement there
+  if any? turtles-on patch-at 0 2 or
+  any? turtles-on patch-at 0 -2 or
+  any? turtles-on patch-at 2 0 or
+  any? turtles-on patch-at 0 2 [
+  report false
+  ]
+  report true
+end
+
+
+to try-build
+  ask turtles[
+  if has-settlement-resources []
+
+  if has-road-resources []
+  ]
+
+end
+
+; Rolls dice and gives resources
 to roll-dice
   let roll random 6 + random 6
   ask patches [
@@ -388,6 +425,8 @@ to give-resources
     ]
 end
 
+
+; Gives the patches labels for their roll values
 to display-labels
   ask patches [ set plabel "" ]
   if show-value? [
