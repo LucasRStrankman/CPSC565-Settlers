@@ -123,7 +123,7 @@ to setup-patches
     if ((pxcor = -2) and (pycor = 2))  [ set pcolor orange set tileValue 10]
     if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set tileValue 6]
     if ((pxcor = 2) and (pycor = 2))  [ set pcolor green set tileValue 8]
-    if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set tileValue 7]
+    if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set tileValue 2]
     if ((pxcor = 6) and (pycor = 2))  [ set pcolor orange set tileValue 5]
     if ((pxcor = 8) and (pycor = 2))  [ set pcolor white set tileValue 5]
 
@@ -145,7 +145,7 @@ to setup-patches
     if ((pxcor = -2) and (pycor = -2))  [ set pcolor yellow set tileValue 4]
     if ((pxcor = 0) and (pycor = -2))  [ set pcolor orange set tileValue 5]
     if ((pxcor = 2) and (pycor = -2))  [ set pcolor green set tileValue 1]
-    if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set tileValue 7]
+    if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set tileValue 6]
     if ((pxcor = 6) and (pycor = -2))  [ set pcolor white set tileValue 0]
     if ((pxcor = 8) and (pycor = -2))  [ set pcolor orange set tileValue 5]
 
@@ -155,8 +155,8 @@ to setup-patches
     if ((pxcor = -4) and (pycor = -4))  [ set pcolor orange set tileValue 8]
     if ((pxcor = -2) and (pycor = -4))  [ set pcolor white set tileValue 12]
     if ((pxcor = 0) and (pycor = -4))  [ set pcolor yellow set tileValue 9]
-    if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set tileValue 7]
-    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set tileValue 7]
+    if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set tileValue 3]
+    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set tileValue 5]
     if ((pxcor = 6) and (pycor = -4))  [ set pcolor yellow set tileValue 4]
     if ((pxcor = 8) and (pycor = -4))  [ set pcolor green set tileValue 6]
 
