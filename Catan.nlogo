@@ -335,21 +335,34 @@ to setup-turtles
   ]
 end
 
+; Check if a player can build a road
+to-report has-road-resources
+  if wood > 1 and brick > 1 [
+    report true
+  ]
+end
 
-
+; Check if a player can build a settlement
+to-report has-settlement-resources
+  if wood > 1 and brick > 1 and wheat > 1 and sheep > 1 [
+    report true
+  ]
+end
 
 ; This is where the dice rolls and the player turns will happen
 to go
+  roll-dice
+  display-labels
+end
+
+to roll-dice
   let roll random 6 + random 6
-  show roll
   ask patches [
     if probability = roll [
-       give-resources
-       show pcolor
+      give-resources
+      show pcolor
     ]
   ]
-
-  display-labels
 end
 
 to give-resources
@@ -385,6 +398,7 @@ to display-labels
     ]
   ]
 end
+
 
 ; This is where the players will make their turns
 to move-turtles
