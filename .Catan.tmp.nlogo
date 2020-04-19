@@ -6,15 +6,22 @@
 
 ;this could probably be made better by making each player own these variable I just had trouble
 ; with initializing the list syntax and decided to move on
+
+; GREEN -> WOOD
+; ORANGE -> BRICK
+; YELLOW -> WHEAT
+; WHITE -> SHEEP
+
 globals [redResources blueResources greyResources validSpots]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
 
+turtles-own [ wood brick wheat sheep vPoints]
 ;Victory Points
-player1-own [ vPoints ]
-player2-own [ vPoints ]
-player3-own [ vPoints ]
+;player1-own [ vPoints ]
+;player2-own [ vPoints ]
+;player3-own [ vPoints ]
 
 patches-own [ probability resourceType ]
 
@@ -68,6 +75,7 @@ to-report playerSurroundings ;surroundings of the players' settlement
   report listofpatches
 end
 to setup-patches
+ clear-patches
   set validSpots []
  ask patches [
     if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor black]
@@ -114,6 +122,7 @@ to setup-patches
 end
 
 to setup-turtles
+  clear-turtles
    create-player1 1
   [
     set redResources []
@@ -172,9 +181,8 @@ end
 ; This is where the dice rolls and the player turns will happen
 to go
   ask patches [
-    ;show pcolor
-    if pcolor = green [
-      ask neighbors4 [
+    if pcolor = red [
+      ask neighbors [
         show turtles-here
       ]
     ]
@@ -187,9 +195,9 @@ to move-turtles
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-221
+342
 10
-589
+710
 379
 -1
 -1
@@ -214,10 +222,10 @@ ticks
 30.0
 
 BUTTON
-74
-59
-137
-92
+17
+23
+80
+56
 setup
 setup
 NIL
@@ -231,10 +239,10 @@ NIL
 1
 
 BUTTON
-74
-103
-137
-136
+94
+24
+157
+57
 go
 go
 NIL
@@ -246,6 +254,61 @@ NIL
 NIL
 NIL
 1
+
+MONITOR
+8
+163
+58
+208
+Rwood
+[wood] of player1
+17
+1
+11
+
+MONITOR
+62
+163
+112
+208
+Rbrick
+[brick] of player1
+17
+1
+11
+
+MONITOR
+117
+163
+167
+208
+Rwheat
+[wheat] of player1
+17
+1
+11
+
+MONITOR
+172
+164
+229
+209
+Rsheep
+[sheep] of player1
+17
+1
+11
+
+MONITOR
+234
+164
+312
+209
+R Vic-points
+[vPoints] of player1
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
