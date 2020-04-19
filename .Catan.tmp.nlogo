@@ -19,9 +19,6 @@ breed [ player3 grey-player]
 
 turtles-own [ wood brick wheat sheep vPoints]
 ;Victory Points
-;player1-own [ vPoints ]
-;player2-own [ vPoints ]
-;player3-own [ vPoints ]
 
 patches-own [ tileValue resourceType ]
 
@@ -37,49 +34,188 @@ to-report settlement-weights
   report (list 0.1 0.1 0.1 0.1 0.1 0.1)
 end
 
-to-report playerSurroundings ;surroundings of the players' settlement
-
-  let listofpatches []
-  ;starts at NE and moves clockwise
-  ;NE
-  if [pcolor] of patch-at 1 1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at 1 1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at 1 1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at 1 1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;SE
-  if [pcolor] of patch-at 1 -1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at 1 -1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at 1 -1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at 1 -1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;SW
-  if [pcolor] of patch-at -1 -1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at -1 -1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at -1 -1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at -1 -1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;NW
-  if [pcolor] of patch-at -1 1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at -1 1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at -1 1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at -1 1 = white [
-  set listofpatches lput "white" listofpatches]
-
-  report listofpatches
+; Gives the patches labels for their roll values
+to display-labels
+  ask patches [ set plabel "" ]
+  if show-value? [
+    ask patches [
+      if pcolor != black and pcolor != sky[
+        set plabel tileValue
+      ]
+    ]
+  ]
 end
+
+
+; This is where the dice rolls and the player turns will happen
+to go
+  display-labels ; get the patches to display their prob-values
+  roll-dice ;Rolls dice and gives resources
+
+end
+
+; This defines what the red-player does
+to redTurn
+  let goal find-best-patch
+  ;try to build at goal
+  ;build road towards goal
+end
+
+; TODO, implement the AI
+to blueTurn
+end
+
+;TODO, implement the AI
+to greyTurn
+end
+
+; Check if a player can build a road
+to-report has-road-resources
+  if wood > 1 and brick > 1 [
+    report true
+  ]
+end
+
+; Check if a player can build a settlement
+to-report has-settlement-resources
+  if wood > 1 and brick > 1 and wheat > 1 and sheep > 1 [
+    report true
+  ]
+end
+
+
+
+; Rolls dice and gives resources
+to roll-dice
+  let roll random 6 + random 6
+  ask patches [
+    if tileValue = roll [
+      give-resources
+      show pcolor
+    ]
+  ]
+end
+
+
+
+
+
+; Returns the patch the player next wants to build a settlement on
+; based on our array of weights
+to-report find-best-patch
+  let bestFound (list 0 patch 0 0) ; quality, patch
+  let temp 0
+  ask patches [
+    if is-valid-settlement[
+      set temp rate-settlement
+      if temp > item 0 bestfound [
+        set bestfound (list temp self)
+      ]
+    ]
+  ]
+  report item 1 bestfound ;return the best patch
+end
+
+
+
+;Rates how good a settlement is based off our (global variable) settlement-weights array
+to-report rate-settlement
+
+  let woodQual (find-resource green * item 0 settlement-weights)
+  let brickQual (find-resource orange * item 1 settlement-weights)
+  let wheatQual (find-resource yellow * item 2 settlement-weights)
+  let sheepQual (find-resource white * item 3 settlement-weights)
+
+  ;TODO find how far away from the nearest road it is
+  ;TODO find how far away from other players it is
+
+  report woodQual + brickQual + wheatQual + sheepQual
+end
+
+
+; Finds the expected production of a resource type (val)
+; from a given patch
+to-report find-resource [val]
+ let w 0
+  if ([pcolor] of patch-at 1 1 = val) [
+     set w w + convert-tileValue [tileValue] of patch-at 1 1]
+  if ([pcolor] of patch-at 1 -1 = val) [
+    set w w + convert-tileValue [tileValue] of patch-at 1 -1 ]
+  if ([pcolor] of patch-at -1 1 = val) [
+   set w w + convert-tileValue [tileValue] of patch-at -1 1]
+  if ([pcolor] of patch-at 1 1 = val) [
+   set w w + convert-tileValue [tileValue] of patch-at -1 -1]
+  report w
+end
+
+
+; Finds the expected production of the tile
+to-report convert-tileValue [prob]
+  if (prob = 0 or prob = 10) [ report 1 ]
+  if (prob = 1 or prob = 9) [ report 2 ]
+  if (prob = 2 or prob = 8) [ report 3 ]
+  if (prob = 3 or prob = 7) [ report 4 ]
+  if (prob = 4 or prob = 5 or prob = 6) [ report 5 ] ; This is because we dont have a robber
+  ;report 0 ; this temp catch code
+  show prob
+end
+
+
+; Checks of a road can be built on
+to-report is-valid-road
+    if (pcolor != black) [ ; out of bounds or other road there
+    report false
+  ]
+end
+
+
+; Checks if a settlement can be built
+to-report is-valid-settlement
+  if (pcolor != black) [ ; out of bounds or other road there
+    report false
+  ]
+
+  ; There is already a settlement there
+  if any? turtles-on patch-at 0 0 or
+  any? turtles-on patch-at 0 2 or
+  any? turtles-on patch-at 0 -2 or
+  any? turtles-on patch-at 2 0 or
+  any? turtles-on patch-at 0 2 [
+  report false
+  ]
+  report true
+end
+
+
+
+
+; Makes a patch gives its resources to neighby settlements
+to give-resources
+  if pcolor = green [
+      ask neighbors [
+        ask turtles-here [set wood wood + 1]
+      ]
+    ]
+  if pcolor = orange [
+    ask neighbors [
+      ask turtles-here [set brick brick + 1]
+    ]
+  ]
+  if pcolor = yellow [
+      ask neighbors [
+        ask turtles-here [set wheat wheat + 1]
+      ]
+    ]
+  if pcolor = white [
+      ask neighbors [
+        ask turtles-here [set sheep sheep + 1]
+      ]
+    ]
+end
+
+
+
+
 ;fixed game board creation
 to setup-patches
   set validSpots []
@@ -129,7 +265,7 @@ to setup-patches
     if ((pxcor = -2) and (pycor = 2))  [ set pcolor orange set tileValue 10]
     if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set tileValue 6]
     if ((pxcor = 2) and (pycor = 2))  [ set pcolor green set tileValue 8]
-    if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set tileValue ]
+    if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set tileValue 2]
     if ((pxcor = 6) and (pycor = 2))  [ set pcolor orange set tileValue 5]
     if ((pxcor = 8) and (pycor = 2))  [ set pcolor white set tileValue 5]
 
@@ -151,7 +287,7 @@ to setup-patches
     if ((pxcor = -2) and (pycor = -2))  [ set pcolor yellow set tileValue 4]
     if ((pxcor = 0) and (pycor = -2))  [ set pcolor orange set tileValue 5]
     if ((pxcor = 2) and (pycor = -2))  [ set pcolor green set tileValue 1]
-    if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set tileValue 7]
+    if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set tileValue 6]
     if ((pxcor = 6) and (pycor = -2))  [ set pcolor white set tileValue 0]
     if ((pxcor = 8) and (pycor = -2))  [ set pcolor orange set tileValue 5]
 
@@ -159,10 +295,10 @@ to setup-patches
     if ((pxcor = -8) and (pycor = -4))  [ set pcolor white set tileValue 6]
     if ((pxcor = -6) and (pycor = -4))  [ set pcolor green set tileValue 3]
     if ((pxcor = -4) and (pycor = -4))  [ set pcolor orange set tileValue 8]
-    if ((pxcor = -2) and (pycor = -4))  [ set pcolor white set tileValue 12]
+    if ((pxcor = -2) and (pycor = -4))  [ set pcolor white set tileValue 10]
     if ((pxcor = 0) and (pycor = -4))  [ set pcolor yellow set tileValue 9]
-    if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set tileValue 7]
-    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set tileValue 7]
+    if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set tileValue 3]
+    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set tileValue 5]
     if ((pxcor = 6) and (pycor = -4))  [ set pcolor yellow set tileValue 4]
     if ((pxcor = 8) and (pycor = -4))  [ set pcolor green set tileValue 6]
 
@@ -196,6 +332,7 @@ to setup-patches
       set validSpots lput (list pxcor pycor) validSpots]
   ]
 end
+
 
 to setup-turtles
    create-player1 1
@@ -258,195 +395,56 @@ to setup-turtles
   ]
 end
 
-; Check if a player can build a road
-to-report has-road-resources
-  if wood > 1 and brick > 1 [
-    report true
-  ]
-end
 
-; Check if a player can build a settlement
-to-report has-settlement-resources
-  if wood > 1 and brick > 1 and wheat > 1 and sheep > 1 [
-    report true
-  ]
-end
+to-report playerSurroundings ;surroundings of the players' settlement
 
+  let listofpatches []
+  ;starts at NE and moves clockwise
+  ;NE
+  if [pcolor] of patch-at 1 1 = green [
+  set listofpatches lput "green" listofpatches]
+  if [pcolor] of patch-at 1 1 = orange [
+  set listofpatches lput "orange" listofpatches]
+  if [pcolor] of patch-at 1 1 = yellow [
+  set listofpatches lput "yellow" listofpatches]
+  if [pcolor] of patch-at 1 1 = white [
+  set listofpatches lput "white" listofpatches]
+  ;SE
+  if [pcolor] of patch-at 1 -1 = green [
+  set listofpatches lput "green" listofpatches]
+  if [pcolor] of patch-at 1 -1 = orange [
+  set listofpatches lput "orange" listofpatches]
+  if [pcolor] of patch-at 1 -1 = yellow [
+  set listofpatches lput "yellow" listofpatches]
+  if [pcolor] of patch-at 1 -1 = white [
+  set listofpatches lput "white" listofpatches]
+  ;SW
+  if [pcolor] of patch-at -1 -1 = green [
+  set listofpatches lput "green" listofpatches]
+  if [pcolor] of patch-at -1 -1 = orange [
+  set listofpatches lput "orange" listofpatches]
+  if [pcolor] of patch-at -1 -1 = yellow [
+  set listofpatches lput "yellow" listofpatches]
+  if [pcolor] of patch-at -1 -1 = white [
+  set listofpatches lput "white" listofpatches]
+  ;NW
+  if [pcolor] of patch-at -1 1 = green [
+  set listofpatches lput "green" listofpatches]
+  if [pcolor] of patch-at -1 1 = orange [
+  set listofpatches lput "orange" listofpatches]
+  if [pcolor] of patch-at -1 1 = yellow [
+  set listofpatches lput "yellow" listofpatches]
+  if [pcolor] of patch-at -1 1 = white [
+  set listofpatches lput "white" listofpatches]
 
-
-; This is where the dice rolls and the player turns will happen
-to go
-  display-labels ; get the patches to display their prob-values
-  roll-dice ;Rolls dice and gives resources
-
-end
-
-; This defines what the red-player does
-to redTurn
-  let goal find-best-patch
-  ;try to build at goal
-  ;build road towards goal
-end
-
-; TODO, implement the AI
-to blueTurn
-end
-
-;TODO, implement the AI
-to greyTurn
-end
-
-
-; Returns the patch the player next wants to build a settlement on
-; based on our array of weights
-to-report find-best-patch
-  let bestFound (list 0 patch-at 0 0) ; quality, patch
-  let temp 0
-  ask patches [
-    if is-valid-settlement[
-      set temp rate-settlement
-      if temp > item 0 bestfound [
-        set bestfound (list temp self)
-      ]
-    ]
-  ]
-  report item 1 bestfound ;return the best patch
-end
-
-
-
-;Rates how good a settlement is based off our (global variable) settlement-weights array
-to-report rate-settlement
-
-  let woodQual (find-resource green * item 0 settlement-weights)
-  let brickQual (find-resource orange * item 1 settlement-weights)
-  let wheatQual (find-resource yellow * item 2 settlement-weights)
-  let sheepQual (find-resource white * item 3 settlement-weights)
-
-  ;TODO find how far away from the nearest road it is
-  ;TODO find how far away from other players it is
-
-  report woodQual + brickQual + wheatQual + sheepQual
-end
-
-
-; Finds the expected production of a resource type (val)
-; from a given patch
-to-report find-resource [val]
- let w 0
-  if ([pcolor] of patch-at 1 1 = val) [
-     set w w + convert-probability [probability] of patch-at 1 1]
-  if ([pcolor] of patch-at 1 -1 = val) [
-    set w w + convert-probability [probability] of patch-at 1 -1 ]
-  if ([pcolor] of patch-at -1 1 = val) [
-   set w w + convert-probability [probability] of patch-at -1 1]
-  if ([pcolor] of patch-at 1 1 = val) [
-   set w w + convert-probability [probability] of patch-at -1 -1]
-  report w
-end
-
-
-; Finds the expected production of the tile
-to-report convert-probability [prob]
-  if (prob = 0 or prob = 10) [ report 1 ]
-  if (prob = 1 or prob = 9) [ report 2 ]
-  if (prob = 2 or prob = 8) [ report 3 ]
-  if (prob = 3 or prob = 7) [ report 4 ]
-  if (prob = 4 or prob = 5 or prob = 6) [ report 5 ] ; This is because we dont have a robber
-  report 0 ; this temp catch code
-end
-
-
-; Checks of a road can be built on
-to-report is-valid-road
-    if (pcolor != black) [ ; out of bounds or other road there
-    report false
-  ]
-end
-
-
-; Checks if a settlement can be built
-to-report is-valid-settlement
-  if (pcolor != black) [ ; out of bounds or other road there
-    report false
-  ]
-
-  ; There is already a settlement there
-  if any? turtles-on patch-at 0 0 or
-  any? turtles-on patch-at 0 2 or
-  any? turtles-on patch-at 0 -2 or
-  any? turtles-on patch-at 2 0 or
-  any? turtles-on patch-at 0 2 [
-  report false
-  ]
-  report true
-end
-
-
-to try-build
-  ask turtles[
-  if has-settlement-resources []
-
-  if has-road-resources []
-  ]
-
-end
-
-
-; Rolls dice and gives resources
-to roll-dice
-  let roll random 6 + random 6
-  ask patches [
-    if probability = roll [
-      give-resources
-      show pcolor
-    ]
-  ]
-end
-
-
-; Makes a patch gives its resources to neighby settlements
-to give-resources
-  if pcolor = green [
-      ask neighbors [
-        ask turtles-here [set wood wood + 1]
-      ]
-    ]
-  if pcolor = orange [
-    ask neighbors [
-      ask turtles-here [set brick brick + 1]
-    ]
-  ]
-  if pcolor = yellow [
-      ask neighbors [
-        ask turtles-here [set wheat wheat + 1]
-      ]
-    ]
-  if pcolor = white [
-      ask neighbors [
-        ask turtles-here [set sheep sheep + 1]
-      ]
-    ]
-end
-
-
-; Gives the patches labels for their roll values
-to display-labels
-  ask patches [ set plabel "" ]
-  if show-value? [
-    ask patches [
-      if pcolor != black and pcolor != sky[
-        set plabel probability
-      ]
-    ]
-  ]
+  report listofpatches
 end
 
 @#$#@#$#@
 GRAPHICS-WINDOW
-342
+351
 10
-825
+834
 494
 -1
 -1
