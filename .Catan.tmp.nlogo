@@ -32,6 +32,11 @@ ca
   display-labels
 end
 
+; returns the array of weights to judge a spot by
+to-report settlement-weights
+  report (list 0.1 0.1 0.1 0.1 0.1 0.1)
+end
+
 to-report playerSurroundings ;surroundings of the players' settlement
 
   let listofpatches []
@@ -355,23 +360,102 @@ end
 to go
   display-labels ; get the patches to display their prob-values
   roll-dice ;Rolls dice and gives resources
- ; try-build
+
+end
+
+; This defines what the red-player does
+to redTurn
+  let goal find-best-patch
+  ;try to build at goal
+  ;build road towards goal
+end
+
+; TODO, implement the AI
+to blueTurn
+end
+
+;TODO, implement the AI
+to greyTurn
 end
 
 
+; Returns the patch the player next wants to build a settlement on
+; based on our array of weights
+to-report find-best-patch
+  let bestFound (list 0 patch-at 0 0) ; quality, patch
+  let temp 0
+  ask patches [
+    if is-valid-settlement[
+      set temp rate-settlement
+      if temp > item 0 bestfound [
+        set bestfound (list temp self)
+      ]
+    ]
+  ]
+  report item 1 bestfound ;return the best patch
+end
+
+
+
+;Rates how good a settlement is based off our (global variable) settlement-weights array
+to-report rate-settlement
+
+  let woodQual (find-resource green * item 0 settlement-weights)
+  let brickQual (find-resource orange * item 1 settlement-weights)
+  let wheatQual (find-resource yellow * item 2 settlement-weights)
+  let sheepQual (find-resource white * item 3 settlement-weights)
+
+  ;TODO find how far away from the nearest road it is
+  ;TODO find how far away from other players it is
+
+  report woodQual + brickQual + wheatQual + sheepQual
+end
+
+
+; Finds the expected production of a resource type (val)
+; from a given patch
+to-report find-resource [val]
+ let w 0
+  if ([pcolor] of patch-at 1 1 = val) [
+     set w w + convert-probability [probability] of patch-at 1 1]
+  if ([pcolor] of patch-at 1 -1 = val) [
+    set w w + convert-probability [probability] of patch-at 1 -1 ]
+  if ([pcolor] of patch-at -1 1 = val) [
+   set w w + convert-probability [probability] of patch-at -1 1]
+  if ([pcolor] of patch-at 1 1 = val) [
+   set w w + convert-probability [probability] of patch-at -1 -1]
+  report w
+end
+
+
+; Finds the expected production of the tile
+to-report convert-probability [prob]
+  if (prob = 0 or prob = 10) [ report 1 ]
+  if (prob = 1 or prob = 9) [ report 2 ]
+  if (prob = 2 or prob = 8) [ report 3 ]
+  if (prob = 3 or prob = 7) [ report 4 ]
+  if (prob = 4 or prob = 5 or prob = 6) [ report 5 ] ; This is because we dont have a robber
+  report 0 ; this temp catch code
+end
+
+
+; Checks of a road can be built on
 to-report is-valid-road
     if (pcolor != black) [ ; out of bounds or other road there
     report false
   ]
 end
 
+
+; Checks if a settlement can be built
 to-report is-valid-settlement
   if (pcolor != black) [ ; out of bounds or other road there
     report false
   ]
 
   ; There is already a settlement there
-  if any? turtles-on patch-at 0 2 or
+  if any? turtles-on patch-at 0 0 or
+  any? turtles-on patch-at 0 2 or
   any? turtles-on patch-at 0 -2 or
   any? turtles-on patch-at 2 0 or
   any? turtles-on patch-at 0 2 [
@@ -390,6 +474,7 @@ to try-build
 
 end
 
+
 ; Rolls dice and gives resources
 to roll-dice
   let roll random 6 + random 6
@@ -401,6 +486,8 @@ to roll-dice
   ]
 end
 
+
+; Makes a patch gives its resources to neighby settlements
 to give-resources
   if pcolor = green [
       ask neighbors [
@@ -437,11 +524,6 @@ to display-labels
   ]
 end
 
-
-; This is where the players will make their turns
-to move-turtles
-
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 342
