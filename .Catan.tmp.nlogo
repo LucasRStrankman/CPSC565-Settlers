@@ -379,7 +379,7 @@ to display-labels
   ask patches [ set plabel "" ]
   if show-value? [
     ask patches [
-      if pcolor != black or pcolor ![
+      if pcolor != black and pcolor != sky[
         set plabel probability
       ]
     ]
@@ -508,15 +508,70 @@ R Vic-points
 11
 
 SWITCH
-90
-270
-242
-303
+98
+357
+250
+390
 show-value?
 show-value?
 0
 1
 -1000
+
+MONITOR
+8
+224
+58
+269
+Bwood
+[wood] of player2
+17
+1
+11
+
+MONITOR
+70
+224
+120
+269
+Bbrick
+[brick] of player2
+17
+1
+11
+
+MONITOR
+133
+224
+183
+269
+Bwheat
+[wheat] of player2
+17
+1
+11
+
+MONITOR
+187
+224
+237
+269
+Bsheep
+[sheep] of player2
+17
+1
+11
+
+MONITOR
+64
+285
+141
+330
+B Vic-points
+[vPoints] of player2
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

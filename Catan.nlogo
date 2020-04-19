@@ -508,15 +508,70 @@ R Vic-points
 11
 
 SWITCH
-90
-270
-242
-303
+98
+357
+250
+390
 show-value?
 show-value?
 0
 1
 -1000
+
+MONITOR
+8
+224
+58
+269
+Bwood
+[wood] of player2
+17
+1
+11
+
+MONITOR
+62
+224
+112
+269
+Bbrick
+[brick] of player2
+17
+1
+11
+
+MONITOR
+118
+223
+168
+268
+Bwheat
+[wheat] of player2
+17
+1
+11
+
+MONITOR
+174
+222
+224
+267
+Bsheep
+[sheep] of player2
+17
+1
+11
+
+MONITOR
+233
+222
+310
+267
+B Vic-points
+[vPoints] of player2
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
