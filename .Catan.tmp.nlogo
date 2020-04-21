@@ -4,15 +4,16 @@
 ; Winter 2020
 ; Catan Project
 
-;this could probably be made better by making each player own these variable I just had trouble
-; with initializing the list syntax and decided to move on
 
 ; GREEN -> WOOD
 ; ORANGE -> BRICK
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [validSpots]
+globals [
+  validSpots
+  rules
+]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
@@ -27,6 +28,33 @@ ca
   setup-patches
   setup-turtles
   display-labels
+  get-rules
+end
+
+;read from file
+to get-rules
+  file-open "test_file_read.txt"   ;txt file here
+
+  set rules []
+  while[not file-at-end?][
+    let in1 file-read
+    let in2 file-read
+    let in3 file-read
+    let in4 file-read
+    let in5 file-read
+    let in6 file-read
+
+    set rules lput in1 rules
+    set rules lput in2 rules
+    set rules lput in3 rules
+    set rules lput in4 rules
+    set rules lput in5 rules
+    set rules lput in6 rules
+
+  ]
+  file-close
+  show rules
+
 end
 
 ; returns the array of weights to judge a spot by
@@ -51,6 +79,7 @@ end
 to go
   display-labels ; get the patches to display their prob-values
   roll-dice ;Rolls dice and gives resources
+  write-rules
 
 end
 
@@ -69,6 +98,7 @@ end
 to greyTurn
 end
 
+
 ; Check if a player can build a road
 to-report has-road-resources
   if wood > 1 and brick > 1 [
@@ -76,13 +106,13 @@ to-report has-road-resources
   ]
 end
 
+
 ; Check if a player can build a settlement
 to-report has-settlement-resources
   if wood > 1 and brick > 1 and wheat > 1 and sheep > 1 [
     report true
   ]
 end
-
 
 
 ; Rolls dice and gives resources
@@ -95,9 +125,6 @@ to roll-dice
     ]
   ]
 end
-
-
-
 
 
 ; Returns the patch the player next wants to build a settlement on
@@ -115,7 +142,6 @@ to-report find-best-patch
   ]
   report item 1 bestfound ;return the best patch
 end
-
 
 
 ;Rates how good a settlement is based off our (global variable) settlement-weights array
@@ -188,7 +214,6 @@ end
 
 
 
-
 ; Makes a patch gives its resources to neighby settlements
 to give-resources
   if pcolor = green [
@@ -212,7 +237,6 @@ to give-resources
       ]
     ]
 end
-
 
 
 
@@ -440,6 +464,17 @@ to-report playerSurroundings ;surroundings of the players' settlement
   report listofpatches
 end
 
+
+to write-rules
+  ask turtles [
+    file-open "file_write_test.txt"
+    show wood
+    show brick
+    show wheat
+    show sheep
+    show vPoints
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 351
