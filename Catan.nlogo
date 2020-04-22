@@ -52,18 +52,16 @@ end
 
 ; This defines what the red-player does
 to redTurn
-  let goal find-best-patch
+  let goal find-best-patch red
   ;try to build at goal
   ;build road towards goal
 end
+
 
 ; TODO, implement the AI
 to blueTurn
 end
 
-;TODO, implement the AI
-to greyTurn
-end
 
 
 ; Check if a player can build a road
@@ -96,12 +94,12 @@ end
 
 ; Returns the patch the player next wants to build a settlement on
 ; based on our array of weights
-to-report find-best-patch
+to-report find-best-patch [col]
   let bestFound (list 0 patch 0 0) ; quality, patch
   let temp 0
   ask patches [
     if is-valid-settlement[
-      set temp rate-settlement
+      set temp rate-settlement col
       if temp > item 0 bestfound [
         set bestfound (list temp self)
       ]
@@ -112,7 +110,7 @@ end
 
 
 ;Rates how good a settlement is based off our (global variable) settlement-weights array
-to-report rate-settlement
+to-report rate-settlement [col]
 
   let woodQual (find-resource green * item 0 settlement-weights)
   let brickQual (find-resource orange * item 1 settlement-weights)
@@ -125,6 +123,15 @@ to-report rate-settlement
   report woodQual + brickQual + wheatQual + sheepQual
 end
 
+to-report closest-structure [col]
+  let closest 0
+  let temp 0
+  ask patches with [pcolor = col][ ;red roads
+    set temp distance self
+    show temp
+  ]
+  report closest
+end
 
 ; Finds the expected production of a resource type (val)
 ; from a given patch
