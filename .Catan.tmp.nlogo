@@ -1,5 +1,4 @@
-; Vince Derayunan
-; 30000214
+; Vince Derayunan, Lucas Ramos-Strankman, Nanjia Wang
 ; CPSC 565
 ; Winter 2020
 ; Catan Project
@@ -37,13 +36,12 @@ to display-labels
   ask patches [ set plabel "" set plabel-color black]
   if show-value? [
     ask patches [
-      if pcolor != black and pcolor != sky[
+      if pcolor != 1 and pcolor != sky[
         set plabel tileValue
       ]
     ]
   ]
 end
-
 
 ; This is where the dice rolls and the player turns will happen
 to go
@@ -158,7 +156,7 @@ end
 
 ; Checks of a road can be built on
 to-report is-valid-road
-    if (pcolor != black) [ ; out of bounds or other road there
+    if (pcolor != 1) [ ; out of bounds or other road there
     report false
   ]
 end
@@ -166,7 +164,7 @@ end
 
 ; Checks if a settlement can be built
 to-report is-valid-settlement
-  if (pcolor != black) [ ; out of bounds or other road there
+  if (pcolor != 1) [ ; out of bounds or other road there
     report false
   ]
 
@@ -211,13 +209,16 @@ to setup-patches
   resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
   ask patches [
     let y (boardSize - 1)
-    if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor blac]
+    if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor 1]
     if (((pxcor > (boardSize - 1)) or (pxcor < (1 - boardSize)))
       or ((pycor > (boardSize - 1)) or (pycor < (1 - boardSize)))) [ set pcolor sky]
     foreach range (boardSize) [
     i ->
       create-row y
       set y (y - 2)
+    ]
+    if ((Desert-Tiles) and (tileValue = 7) and ((pcolor != 1) or (pcolor != sky)))  [
+      set pcolor brown
     ]
   ]
 end
@@ -226,8 +227,8 @@ to create-row [y]
   let x (boardSize - 1)
   foreach range (boardSize) [
     i ->
-    let randTile random 6 + random 6
     let randColor random 4
+    let randTile random 6 + random 6
     (ifelse
     randColor = 0 [
       if ((pxcor = x) and (pycor = y))  [ set pcolor green set tileValue randTile]
@@ -441,10 +442,10 @@ R Vic-points
 11
 
 SWITCH
-98
-357
-250
-390
+18
+335
+170
+368
 show-value?
 show-value?
 0
@@ -507,10 +508,10 @@ B Vic-points
 11
 
 CHOOSER
-106
-410
-244
-455
+177
+18
+315
+63
 boardSize
 boardSize
 9 11
@@ -559,6 +560,17 @@ blueYstart
 1
 0
 Number
+
+SWITCH
+18
+289
+139
+322
+Desert-Tiles
+Desert-Tiles
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
