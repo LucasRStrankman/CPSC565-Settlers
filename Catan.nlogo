@@ -10,7 +10,7 @@
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [validSpots]
+globals [validSpot]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
@@ -34,10 +34,10 @@ end
 
 ; Gives the patches labels for their roll values
 to display-labels
-  ask patches [ set plabel "" ]
+  ask patches [ set plabel "" set plabel-color black]
   if show-value? [
     ask patches [
-      if pcolor != black and pcolor != sky[
+      if pcolor != 1 and pcolor != sky[
         set plabel tileValue
       ]
     ]
@@ -207,125 +207,43 @@ to give-resources
     ]
 end
 
-
-
-;fixed game board creation
 to setup-patches
-  set validSpots []
- ask patches [
-    if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor black]
-    if (((pxcor > 8) or (pxcor < -8)) or ((pycor > 8) or (pycor < -8))) [ set pcolor sky]
-    ;fixed game board
-
-    ;3rd row
-
-    if ((pxcor = -8) and (pycor = 8))  [ set pcolor yellow set tileValue 4]
-    if ((pxcor = -6) and (pycor = 8))  [ set pcolor white set tileValue 10]
-    if ((pxcor = -4) and (pycor = 8))  [ set pcolor orange set tileValue 2]
-    if ((pxcor = -2) and (pycor = 8))  [ set pcolor green set tileValue 10]
-    if ((pxcor = 0) and (pycor = 8))  [ set pcolor yellow set tileValue 8]
-    if ((pxcor = 2) and (pycor = 8))  [ set pcolor yellow set tileValue 2]
-    if ((pxcor = 4) and (pycor = 8))  [ set pcolor green set tileValue 4]
-    if ((pxcor = 6) and (pycor = 8))  [ set pcolor white set tileValue 8]
-    if ((pxcor = 8) and (pycor = 8))  [ set pcolor green set tileValue 6]
-
-    ;4th row
-    if ((pxcor = -8) and (pycor = 6))  [ set pcolor green set tileValue 9]
-    if ((pxcor = -6) and (pycor = 6))  [ set pcolor yellow set tileValue 0]
-    if ((pxcor = -4) and (pycor = 6))  [ set pcolor green set tileValue 1]
-    if ((pxcor = -2) and (pycor = 6))  [ set pcolor yellow set tileValue 5]
-    if ((pxcor = 0) and (pycor = 6))  [ set pcolor yellow set tileValue 2]
-    if ((pxcor = 2) and (pycor = 6))  [ set pcolor green set tileValue 0]
-    if ((pxcor = 4) and (pycor = 6))  [ set pcolor yellow set tileValue 3]
-    if ((pxcor = 6) and (pycor = 6))  [ set pcolor orange set tileValue 0]
-    if ((pxcor = 8) and (pycor = 6))  [ set pcolor orange set tileValue 10]
-
-    ;5th row
-    if ((pxcor = -8) and (pycor = 4))  [ set pcolor white set tileValue 1]
-    if ((pxcor = -6) and (pycor = 4))  [ set pcolor orange set tileValue 0]
-    if ((pxcor = -4) and (pycor = 4))  [ set pcolor green set tileValue 3]
-    if ((pxcor = -2) and (pycor = 4))  [ set pcolor green set tileValue 10]
-    if ((pxcor = 0) and (pycor = 4))  [ set pcolor white set tileValue 2]
-    if ((pxcor = 2) and (pycor = 4))  [ set pcolor orange set tileValue 9]
-    if ((pxcor = 4) and (pycor = 4))  [ set pcolor yellow set tileValue 8]
-    if ((pxcor = 6) and (pycor = 4))  [ set pcolor green set tileValue 10]
-    if ((pxcor = 8) and (pycor = 4))  [ set pcolor yellow set tileValue 0]
-
-    ;6th row
-    if ((pxcor = -8) and (pycor = 2))  [ set pcolor yellow set tileValue 3]
-    if ((pxcor = -6) and (pycor = 2))  [ set pcolor green set tileValue 4]
-    if ((pxcor = -4) and (pycor = 2))  [ set pcolor yellow set tileValue 6]
-    if ((pxcor = -2) and (pycor = 2))  [ set pcolor orange set tileValue 10]
-    if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set tileValue 6]
-    if ((pxcor = 2) and (pycor = 2))  [ set pcolor green set tileValue 8]
-    if ((pxcor = 4) and (pycor = 2))  [ set pcolor white set tileValue 2]
-    if ((pxcor = 6) and (pycor = 2))  [ set pcolor orange set tileValue 5]
-    if ((pxcor = 8) and (pycor = 2))  [ set pcolor white set tileValue 5]
-
-    ;7th row
-    if ((pxcor = -8) and (pycor = 0))  [ set pcolor orange set tileValue 8]
-    if ((pxcor = -6) and (pycor = 0))  [ set pcolor orange set tileValue 0]
-    if ((pxcor = -4) and (pycor = 0))  [ set pcolor green set tileValue 5]
-    if ((pxcor = -2) and (pycor = 0))  [ set pcolor brown set tileValue 7] ;desert tile
-    if ((pxcor = 0) and (pycor = 0))  [ set pcolor green set tileValue 3]
-    if ((pxcor = 2) and (pycor = 0))  [ set pcolor white set tileValue 9]
-    if ((pxcor = 4) and (pycor = 0))  [ set pcolor yellow set tileValue 4]
-    if ((pxcor = 6) and (pycor = 0))  [ set pcolor green set tileValue 1]
-    if ((pxcor = 8) and (pycor = 0))  [ set pcolor white set tileValue 8]
-
-    ;8th row
-    if ((pxcor = -8) and (pycor = -2))  [ set pcolor green set tileValue 10]
-    if ((pxcor = -6) and (pycor = -2))  [ set pcolor orange set tileValue 5]
-    if ((pxcor = -4) and (pycor = -2))  [ set pcolor white set tileValue 3]
-    if ((pxcor = -2) and (pycor = -2))  [ set pcolor yellow set tileValue 4]
-    if ((pxcor = 0) and (pycor = -2))  [ set pcolor orange set tileValue 5]
-    if ((pxcor = 2) and (pycor = -2))  [ set pcolor green set tileValue 1]
-    if ((pxcor = 4) and (pycor = -2))  [ set pcolor orange set tileValue 6]
-    if ((pxcor = 6) and (pycor = -2))  [ set pcolor white set tileValue 0]
-    if ((pxcor = 8) and (pycor = -2))  [ set pcolor orange set tileValue 5]
-
-    ;9th row
-    if ((pxcor = -8) and (pycor = -4))  [ set pcolor white set tileValue 6]
-    if ((pxcor = -6) and (pycor = -4))  [ set pcolor green set tileValue 3]
-    if ((pxcor = -4) and (pycor = -4))  [ set pcolor orange set tileValue 8]
-    if ((pxcor = -2) and (pycor = -4))  [ set pcolor white set tileValue 10]
-    if ((pxcor = 0) and (pycor = -4))  [ set pcolor yellow set tileValue 9]
-    if ((pxcor = 2) and (pycor = -4))  [ set pcolor orange set tileValue 3]
-    if ((pxcor = 4) and (pycor = -4))  [ set pcolor yellow set tileValue 5]
-    if ((pxcor = 6) and (pycor = -4))  [ set pcolor yellow set tileValue 4]
-    if ((pxcor = 8) and (pycor = -4))  [ set pcolor green set tileValue 6]
-
-    ;10th row
-    if ((pxcor = -8) and (pycor = -6))  [ set pcolor green set tileValue 4]
-    if ((pxcor = -6) and (pycor = -6))  [ set pcolor orange set tileValue 9]
-    if ((pxcor = -4) and (pycor = -6))  [ set pcolor yellow set tileValue 0]
-    if ((pxcor = -2) and (pycor = -6))  [ set pcolor green set tileValue 1]
-    if ((pxcor = 0) and (pycor = -6))  [ set pcolor yellow set tileValue 0]
-    if ((pxcor = 2) and (pycor = -6))  [ set pcolor white set tileValue 0]
-    if ((pxcor = 4) and (pycor = -6))  [ set pcolor yellow set tileValue 5]
-    if ((pxcor = 6) and (pycor = -6))  [ set pcolor green set tileValue 2]
-    if ((pxcor = 8) and (pycor = -6))  [ set pcolor white set tileValue 2]
-
-    ;11th row
-    if ((pxcor = -8) and (pycor = -8))  [ set pcolor green set tileValue 2]
-    if ((pxcor = -6) and (pycor = -8))  [ set pcolor white set tileValue 10]
-    if ((pxcor = -4) and (pycor = -8))  [ set pcolor yellow set tileValue 8]
-    if ((pxcor = -2) and (pycor = -8))  [ set pcolor green set tileValue 8]
-    if ((pxcor = 0) and (pycor = -8))  [ set pcolor white set tileValue 6]
-    if ((pxcor = 2) and (pycor = -8))  [ set pcolor orange set tileValue 3]
-    if ((pxcor = 4) and (pycor = -8))  [ set pcolor yellow set tileValue 5]
-    if ((pxcor = 6) and (pycor = -8))  [ set pcolor green set tileValue 0]
-    if ((pxcor = 8) and (pycor = -8))  [ set pcolor orange set tileValue 4]
-
-    ; probably needs to be moved, currently only gives all spots including those
-    ; taken by an initial settlement. Each player probably needs to have a separate list
-
-    if ((not (pxcor mod 2 = 0)) and (not (pycor mod 2 = 0)) and ((pxcor < 8)
-      and (pycor < 8)) and ((pxcor > -8) and (pycor > -8))) [
-      set validSpots lput (list pxcor pycor) validSpots]
+  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
+  ask patches [
+    let y (boardSize - 1)
+    if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor 1]
+    if (((pxcor > (boardSize - 1)) or (pxcor < (1 - boardSize)))
+      or ((pycor > (boardSize - 1)) or (pycor < (1 - boardSize)))) [ set pcolor sky]
+    foreach range (boardSize) [
+    i ->
+      create-row y
+      set y (y - 2)
+    ]
   ]
 end
 
+to create-row [y]
+  let x (boardSize - 1)
+  foreach range (boardSize) [
+    i ->
+    let randTile random 6 + random 6
+    let randColor random 4
+    (ifelse
+    randColor = 0 [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor green set tileValue randTile]
+    ]
+    randColor = 1 [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor orange set tileValue randTile]
+    ]
+    randColor = 2 [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor yellow set tileValue randTile]
+    ]
+    randColor = 3 [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor white set tileValue randTile]
+    ])
+    set x (x - 2)
+    ]
+end
 
 to setup-turtles
    create-player1 1
@@ -333,7 +251,7 @@ to setup-turtles
     set shape "house"
     set color red
     set vPoints 0
-    setxy -5 5 ;starting position
+    setxy redXstart redYstart ;starting position
     ask player1 [
       foreach playerSurroundings [ [resource] -> ;gives out initial resources (is this a rule? i forgot)
          if(resource = "green") [set wood wood + 1]
@@ -342,10 +260,6 @@ to setup-turtles
         if(resource = "white") [set sheep sheep + 1]
       ]
     ]
-    show wood  ;for debugging
-    show brick
-    show wheat
-    show sheep
   ]
 
   create-player2 1
@@ -353,7 +267,7 @@ to setup-turtles
     set shape "house"
     set color blue
     set vPoints 0
-    setxy -5 -7 ;starting position
+    setxy blueXstart blueYstart ;starting position
     ask player2 [
       foreach playerSurroundings [ [resource] ->
         if(resource = "green") [set wood wood + 1]
@@ -362,29 +276,6 @@ to setup-turtles
         if(resource = "white") [set sheep sheep + 1]
       ]
     ]
-    show wood  ;for debugging
-    show brick
-    show wheat
-    show sheep
-  ]
-  create-player3 1
-  [
-    set shape "house"
-    set color grey
-    set vPoints 0
-    setxy 7 -1 ;starting position
-    ask player3 [
-      foreach playerSurroundings [ [resource] ->
-         if(resource = "green") [set wood wood + 1]
-        if(resource = "orange") [set brick brick + 1]
-        if(resource = "yellow") [set wheat wheat + 1]
-        if(resource = "white") [set sheep sheep + 1]
-      ]
-    ]
-    show wood  ;for debugging
-    show brick
-    show wheat
-    show sheep
   ]
 end
 
@@ -432,13 +323,12 @@ to-report playerSurroundings ;surroundings of the players' settlement
 
   report listofpatches
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 351
 10
-834
-494
+984
+644
 -1
 -1
 25.0
@@ -451,10 +341,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--9
-9
--9
-9
+-12
+12
+-12
+12
 0
 0
 1
@@ -615,6 +505,60 @@ B Vic-points
 17
 1
 11
+
+CHOOSER
+106
+410
+244
+455
+boardSize
+boardSize
+9 11
+1
+
+INPUTBOX
+18
+76
+77
+136
+redXstart
+-5.0
+1
+0
+Number
+
+INPUTBOX
+76
+76
+136
+136
+redYstart
+5.0
+1
+0
+Number
+
+INPUTBOX
+186
+78
+246
+138
+blueXstart
+1.0
+1
+0
+Number
+
+INPUTBOX
+245
+78
+305
+138
+blueYstart
+-7.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
