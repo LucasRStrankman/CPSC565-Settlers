@@ -307,7 +307,7 @@ end
 
 
 to setup-patches
-  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
+  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1) ;resize world depending on map size
   ask patches [
     let y (boardSize - 1)
     if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor 1]
@@ -318,31 +318,49 @@ to setup-patches
       create-row y
       set y (y - 2)
     ]
-    if ((Desert-Tiles) and (tileValue = 7) and ((pcolor != 1) or (pcolor != sky)))  [
-      set pcolor brown
-    ]
+    fix-tile-value ; 7 tileValue should only be for desert tiles
   ]
 end
 
+; finds all resources with a 7 tile value and gives it a new non-7 tileValue
+to fix-tile-value
+  if ((tileValue = 7) and (pcolor != brown) and ((pcolor != 1) or (pcolor != sky))) [
+     let addorsub random 2
+     let randnum random 3 + 1
+      (ifelse
+        addorsub = 0 [
+          (set tileValue (tileValue + randnum))
+        ]
+        addorsub = 1 [
+          (set tileValue (tileValue - randnum))
+        ])
+    ]
+end
 
+; determines distribution of resources in the map using percentage as probability
 to create-row [y]
   let x (boardSize - 1)
   foreach range (boardSize) [
     i ->
-    let randColor random 4
+    let randColor random 100
     let randTile random 6 + random 6
     (ifelse
-    randColor = 0 [
+    randColor < woodProbability [ ;wood
       if ((pxcor = x) and (pycor = y))  [ set pcolor green set tileValue randTile]
     ]
-    randColor = 1 [
+    ((randColor >= woodProbability) and (randColor < (woodProbability + brickProbability))) [ ;brick
       if ((pxcor = x) and (pycor = y))  [ set pcolor orange set tileValue randTile]
     ]
-    randColor = 2 [
+    ((randColor >= (woodProbability + brickProbability)) and
+     (randColor < (woodProbability + brickProbability + wheatProbability))) [ ;wheat
       if ((pxcor = x) and (pycor = y))  [ set pcolor yellow set tileValue randTile]
     ]
-    randColor = 3 [
+    ((randColor >= (woodProbability + brickProbability + wheatProbability)) and ;sheep
+     (randColor < (woodProbability + brickProbability + wheatProbability + sheepProbability))) [
       if ((pxcor = x) and (pycor = y))  [ set pcolor white set tileValue randTile]
+    ]
+    (randColor >= (woodProbability + brickProbability + wheatProbability + sheepProbability)) [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor brown set tileValue 7] ;desert
     ])
     set x (x - 2)
     ]
@@ -674,16 +692,80 @@ blueYstart
 0
 Number
 
-SWITCH
-18
-289
-139
-322
-Desert-Tiles
-Desert-Tiles
+SLIDER
+17
+375
+189
+408
+woodProbability
+woodProbability
 0
+100 - (desertProbability + brickProbability + wheatProbability + sheepProbability)
+24.0
 1
--1000
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+407
+189
+440
+brickProbability
+brickProbability
+0
+100 - (desertProbability + woodProbability + wheatProbability + sheepProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+439
+189
+472
+wheatProbability
+wheatProbability
+0
+100 - (desertProbability + brickProbability + woodProbability + sheepProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+471
+189
+504
+sheepProbability
+sheepProbability
+0
+100 - (desertProbability + brickProbability + wheatProbability + woodProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+503
+189
+536
+desertProbability
+desertProbability
+0
+100 - (brickProbability + wheatProbability + woodProbability + sheepProbability)
+4.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

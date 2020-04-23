@@ -9,7 +9,7 @@
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [validSpot]
+globals [validSpot rWood rBrick rWheat rSheep rVPoints]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
@@ -20,7 +20,13 @@ turtles-own [ wood brick wheat sheep vPoints]
 patches-own [ tileValue resourceType ]
 
 to setup
-ca
+  ca
+  ;use this for just testing it
+  set rWood 100
+  set rBrick 100
+  set rWheat 100
+  set rSheep 100
+
   setup-patches
   setup-turtles
   display-labels
@@ -31,54 +37,105 @@ to-report settlement-weights
   report (list 0.1 0.1 0.1 0.1 0.1 0.1)
 end
 
+; This is where the dice rolls and the player turns will happen
+to go
+  display-labels ; get the patches to display their prob-values
+  roll-dice ;Rolls dice and gives resources
+  redturn
+end
+
+
 ; Gives the patches labels for their roll values
 to display-labels
   ask patches [ set plabel "" set plabel-color black]
   if show-value? [
     ask patches [
-      if pcolor != 1 and pcolor != sky[
+      if pcolor != 1 and pcolor != sky and pcolor != red[
         set plabel tileValue
       ]
     ]
   ]
 end
 
-; This is where the dice rolls and the player turns will happen
-to go
-  display-labels ; get the patches to display their prob-values
-  roll-dice ;Rolls dice and gives resources
 
-end
 
 ; This defines what the red-player does
 to redTurn
-  let goal find-best-patch
-  ;try to build at goal
-  ;build road towards goal
+  ; Where it tries to build to next
+  let goal find-best-patch red
+  let buildFrom 0
+  let buildNext 0
+
+  ;Find the closest structure to the goal to build from
+  ask goal [
+   set buildFrom item 1 closest-structure red ; The closest structure to the goal
+  ]
+
+  ;Find the current structure we are building off of, find the patch we are building onto
+  ask buildFrom[
+    let closest (list 10000 self)
+    ask neighbors4[
+      let temp distance goal
+      if is-valid-road and temp < first closest [
+        set closest (list temp self)
+      ]
+     set buildNext item 1 closest
+    ]
+  ]
+
+  ; If we are building onto the goal, build a settlement
+  ;otherwise, build a road
+ ifelse buildNext = goal [
+    try-build-settlement buildNext
+ ]
+  [
+    try-build-road buildNext
+  ]
+;   show goal
+;  show buildFrom
+;  show buildNext
 end
 
-; TODO, implement the AI
-to blueTurn
+
+;Currently only setup to work for Red
+to try-build-settlement [destination]
+  if has-settlement-resources [
+    set rWood rWood - 1
+    set rBrick rBrick - 1
+    set rWheat rWheat - 1
+    set rSheep rSheep - 1
+    set rVPoints rVPoints + 1
+    create-red-settlement destination
+    ;ask destination [sprout-player1 1]
+  ]
 end
 
-;TODO, implement the AI
-to greyTurn
+
+;Currently only setup to work for Red
+to try-build-road [destination]
+  if has-road-resources [
+    set rWood rWood - 1
+    set rBrick rBrick - 1
+    ask destination [set pcolor red]
+  ]
 end
 
 
-; Check if a player can build a road
+;Currently only setup to work for Red
 to-report has-road-resources
-  if wood > 1 and brick > 1 [
+  if rWood > 0 and rBrick > 0 [
     report true
   ]
+  report false
 end
 
 
-; Check if a player can build a settlement
+;Currently only setup to work for Red
 to-report has-settlement-resources
-  if wood > 1 and brick > 1 and wheat > 1 and sheep > 1 [
+  if rWood > 1 and rBrick > 1 and rWheat > 1 and rSheep > 1 [
     report true
   ]
+  report false
 end
 
 
@@ -87,8 +144,8 @@ to roll-dice
   let roll random 6 + random 6
   ask patches [
     if tileValue = roll [
-      give-resources
-      show pcolor
+      give-resources pcolor
+      ;show pcolor
     ]
   ]
 end
@@ -96,12 +153,12 @@ end
 
 ; Returns the patch the player next wants to build a settlement on
 ; based on our array of weights
-to-report find-best-patch
-  let bestFound (list 0 patch 0 0) ; quality, patch
+to-report find-best-patch [col]
+  let bestFound (list -100000000 patch 0 0) ; quality, patch
   let temp 0
   ask patches [
     if is-valid-settlement[
-      set temp rate-settlement
+      set temp rate-settlement col
       if temp > item 0 bestfound [
         set bestfound (list temp self)
       ]
@@ -112,17 +169,35 @@ end
 
 
 ;Rates how good a settlement is based off our (global variable) settlement-weights array
-to-report rate-settlement
+to-report rate-settlement [col]
 
   let woodQual (find-resource green * item 0 settlement-weights)
   let brickQual (find-resource orange * item 1 settlement-weights)
   let wheatQual (find-resource yellow * item 2 settlement-weights)
   let sheepQual (find-resource white * item 3 settlement-weights)
+  let dist (first closest-structure red * item 4 settlement-weights)
 
-  ;TODO find how far away from the nearest road it is
-  ;TODO find how far away from other players it is
+  report woodQual + brickQual + wheatQual + sheepQual - dist
+end
 
-  report woodQual + brickQual + wheatQual + sheepQual
+
+; Finds the closest road or settlement of the given color
+; To the calling agent
+to-report closest-structure [col]
+  let x pxcor
+  let y pycor
+  let nearestSettlement min-one-of turtles with [color = col] [distancexy x y]
+  set nearestSettlement (list distance nearestSettlement nearestSettlement)
+
+  let nearestPatch min-one-of patches with [pcolor = col] [distancexy x y]
+  ifelse nearestPatch = nobody
+   [ set nearestPatch nearestSettlement ]
+     [  set nearestPatch (list distance nearestPatch nearestPatch) ]
+
+  ifelse first nearestSettlement < first nearestPatch
+     [ report nearestSettlement ]
+     [ report nearestPatch]
+
 end
 
 
@@ -159,6 +234,7 @@ to-report is-valid-road
     if (pcolor != 1) [ ; out of bounds or other road there
     report false
   ]
+  report true
 end
 
 
@@ -169,41 +245,66 @@ to-report is-valid-settlement
   ]
 
   ; There is already a settlement there
-  if any? turtles-on patch-at 0 0 or
+  if any? turtles-on patch-at 0 0 or ; Two away
   any? turtles-on patch-at 0 2 or
   any? turtles-on patch-at 0 -2 or
   any? turtles-on patch-at 2 0 or
-  any? turtles-on patch-at 0 2 [
+  any? turtles-on patch-at -2 0 or
+  any? turtles-on patch-at 0 1 or   ; Right next to another settlement
+  any? turtles-on patch-at 0 -1 or
+  any? turtles-on patch-at 1 0 or
+  any? turtles-on patch-at -1 0 or
+  any? turtles-on patch-at 1 1 or   ; Corner to a settlement
+  any? turtles-on patch-at 1 -1 or
+  any? turtles-on patch-at -1 1 or
+  any? turtles-on patch-at -1 -1 [
   report false
   ]
+
   report true
 end
 
 
 
 ; Makes a patch gives its resources to neighby settlements
-to give-resources
-  if pcolor = green [
-      ask neighbors [
-        ask turtles-here [set wood wood + 1]
-      ]
-    ]
-  if pcolor = orange [
-    ask neighbors [
-      ask turtles-here [set brick brick + 1]
+to give-resources [col]
+  ask neighbors [
+   ask turtles-here [
+     add-player-resources col
     ]
   ]
-  if pcolor = yellow [
-      ask neighbors [
-        ask turtles-here [set wheat wheat + 1]
-      ]
-    ]
-  if pcolor = white [
-      ask neighbors [
-        ask turtles-here [set sheep sheep + 1]
-      ]
-    ]
+
 end
+
+
+; Helper for give-resources
+; Works to give to the correct player i.e. red vs. blue etc.
+to add-player-resources [rType]
+  if color = red [ ; if it is a red settlement
+    (ifelse
+      rType = green [
+        set rWood rWood + 1
+      ]
+       rType = orange [
+        set rBrick rBrick + 1
+      ]
+       rType = yellow [
+        set rWheat rWheat + 1
+      ]
+       rType = white [
+        set rSheep rSheep + 1
+      ]
+       rType = brown or rType = 1 or rType = red [
+        ; do nothing, this is a desert or road
+      ]
+      [
+     ;   show rType
+      ;  show "Error in add-player-resources"
+      ])
+  ]
+  ; Copy this if we add other player colours
+end
+
 
 to setup-patches
   resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
@@ -217,34 +318,64 @@ to setup-patches
       create-row y
       set y (y - 2)
     ]
-    if ((Desert-Tiles) and (tileValue = 7) and ((pcolor != 1) or (pcolor != sky)))  [
-      set pcolor brown
-    ]
+    fix-tile-value ; 7 tileValue should only be for desert tiles
   ]
 end
 
+; finds all resources with a 7 tile value and gives it a new non-7 tileValue
+to fix-tile-value
+  if ((tileValue = 7) and (pcolor != brown) and ((pcolor != 1) or (pcolor != sky))) [
+     let addorsub random 2
+     let randnum random 3 + 1
+      (ifelse
+        addorsub = 0 [
+          (set tileValue (tileValue + randnum))
+        ]
+        addorsub = 1 [
+          (set tileValue (tileValue - randnum))
+        ])
+    ]
+end
+
+; determines distribution of resources in the map using percentage as probability
 to create-row [y]
   let x (boardSize - 1)
   foreach range (boardSize) [
     i ->
-    let randColor random 4
+    let randColor random 100
     let randTile random 6 + random 6
     (ifelse
-    randColor = 0 [
+    randColor < woodProbability [ ;wood
       if ((pxcor = x) and (pycor = y))  [ set pcolor green set tileValue randTile]
     ]
-    randColor = 1 [
+    ((randColor >= woodProbability) and (randColor < (woodProbability + brickProbability))) [ ;brick
       if ((pxcor = x) and (pycor = y))  [ set pcolor orange set tileValue randTile]
     ]
-    randColor = 2 [
+    ((randColor >= (woodProbability + brickProbability)) and
+     (randColor < (woodProbability + brickProbability + wheatProbability))) [ ;wheat
       if ((pxcor = x) and (pycor = y))  [ set pcolor yellow set tileValue randTile]
     ]
-    randColor = 3 [
+    ((randColor >= (woodProbability + brickProbability + wheatProbability)) and ;sheep
+     (randColor < (woodProbability + brickProbability + wheatProbability + sheepProbability))) [
       if ((pxcor = x) and (pycor = y))  [ set pcolor white set tileValue randTile]
+    ]
+    (randColor >= (woodProbability + brickProbability + wheatProbability + sheepProbability)) [
+      if ((pxcor = x) and (pycor = y))  [ set pcolor brown set tileValue 7] ;desert
     ])
     set x (x - 2)
     ]
 end
+
+
+to create-red-settlement [destination]
+  ask destination [
+      sprout-player1 1 [
+       set shape "house"
+      set color red
+    ]
+  ]
+end
+
 
 to setup-turtles
    create-player1 1
@@ -255,10 +386,10 @@ to setup-turtles
     setxy redXstart redYstart ;starting position
     ask player1 [
       foreach playerSurroundings [ [resource] -> ;gives out initial resources (is this a rule? i forgot)
-         if(resource = "green") [set wood wood + 1]
-        if(resource = "orange") [set brick brick + 1]
-        if(resource = "yellow") [set wheat wheat + 1]
-        if(resource = "white") [set sheep sheep + 1]
+         if(resource = "green") [set rWood rWood + 1]
+        if(resource = "orange") [set rBrick rBrick + 1]
+        if(resource = "yellow") [set rWheat rWheat + 1]
+        if(resource = "white") [set rSheep rSheep + 1]
       ]
     ]
   ]
@@ -392,7 +523,7 @@ MONITOR
 58
 208
 Rwood
-[wood] of player1
+rWood
 17
 1
 11
@@ -403,7 +534,7 @@ MONITOR
 112
 208
 Rbrick
-[brick] of player1
+rBrick
 17
 1
 11
@@ -414,7 +545,7 @@ MONITOR
 167
 208
 Rwheat
-[wheat] of player1
+rWheat
 17
 1
 11
@@ -425,7 +556,7 @@ MONITOR
 229
 209
 Rsheep
-[sheep] of player1
+rSheep
 17
 1
 11
@@ -436,7 +567,7 @@ MONITOR
 312
 209
 R Vic-points
-[vPoints] of player1
+rVPoints
 17
 1
 11
@@ -561,16 +692,80 @@ blueYstart
 0
 Number
 
-SWITCH
-18
-289
-139
-322
-Desert-Tiles
-Desert-Tiles
+SLIDER
+17
+375
+189
+408
+woodProbability
+woodProbability
 0
+100 - (desertProbability + brickProbability + wheatProbability + sheepProbability)
+24.0
 1
--1000
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+407
+189
+440
+brickProbability
+brickProbability
+0
+100 - (desertProbability + woodProbability + wheatProbability + sheepProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+439
+189
+472
+wheatProbability
+wheatProbability
+0
+100 - (desertProbability + brickProbability + woodProbability + sheepProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+471
+189
+504
+sheepProbability
+sheepProbability
+0
+100 - (desertProbability + brickProbability + wheatProbability + woodProbability)
+24.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+503
+189
+536
+desertProbability
+desertProbability
+0
+100 - (brickProbability + wheatProbability + woodProbability + sheepProbability)
+4.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
