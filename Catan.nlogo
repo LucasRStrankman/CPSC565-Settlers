@@ -20,13 +20,13 @@ turtles-own [ wood brick wheat sheep vPoints]
 patches-own [ tileValue resourceType ]
 
 to setup
-ca
-  ;;;;;
-;  set rWood 100
-;  set rBrick 100
-;  set rWheat 100
-;  set rSheep 100
-  ;;;
+  ca
+  ;use this for just testing it
+  set rWood 100
+  set rBrick 100
+  set rWheat 100
+  set rSheep 100
+
   setup-patches
   setup-turtles
   display-labels
@@ -36,6 +36,14 @@ end
 to-report settlement-weights
   report (list 0.1 0.1 0.1 0.1 0.1 0.1)
 end
+
+; This is where the dice rolls and the player turns will happen
+to go
+  display-labels ; get the patches to display their prob-values
+  roll-dice ;Rolls dice and gives resources
+  redturn
+end
+
 
 ; Gives the patches labels for their roll values
 to display-labels
@@ -49,30 +57,25 @@ to display-labels
   ]
 end
 
-; This is where the dice rolls and the player turns will happen
-to go
-  display-labels ; get the patches to display their prob-values
-  roll-dice ;Rolls dice and gives resources
-  redturn
-end
+
 
 ; This defines what the red-player does
 to redTurn
+  ; Where it tries to build to next
   let goal find-best-patch red
   let buildFrom 0
   let buildNext 0
 
-
+  ;Find the closest structure to the goal to build from
   ask goal [
    set buildFrom item 1 closest-structure red ; The closest structure to the goal
   ]
+
+  ;Find the current structure we are building off of, find the patch we are building onto
   ask buildFrom[
     let closest (list 10000 self)
     ask neighbors4[
       let temp distance goal
-;      show self
-;      show temp
-;      show closest
       if is-valid-road and temp < first closest [
         set closest (list temp self)
       ]
@@ -80,21 +83,19 @@ to redTurn
     ]
   ]
 
-
-;  show buildNext
+  ; If we are building onto the goal, build a settlement
+  ;otherwise, build a road
  ifelse buildNext = goal [
     try-build-settlement buildNext
  ]
   [
     try-build-road buildNext
   ]
-   show goal
-  show buildFrom
-  show buildNext
-
-
-
+;   show goal
+;  show buildFrom
+;  show buildNext
 end
+
 
 ;Currently only setup to work for Red
 to try-build-settlement [destination]
@@ -118,6 +119,7 @@ to try-build-road [destination]
     ask destination [set pcolor red]
   ]
 end
+
 
 ;Currently only setup to work for Red
 to-report has-road-resources
@@ -182,19 +184,8 @@ end
 ; Finds the closest road or settlement of the given color
 ; To the calling agent
 to-report closest-structure [col]
-;  let closest (list 10000 self) ;just a large number to start with
-;  let temp 0
   let x pxcor
   let y pycor
-;  ask patches with [pcolor = col][ ;red roads
-;    set temp distancexy x y
-;    if temp < first closest [
-;      set closest (list temp self)
-;    ]
-;  ]
-
-
-
   let nearestSettlement min-one-of turtles with [color = col] [distancexy x y]
   set nearestSettlement (list distance nearestSettlement nearestSettlement)
 
@@ -203,22 +194,10 @@ to-report closest-structure [col]
    [ set nearestPatch nearestSettlement ]
      [  set nearestPatch (list distance nearestPatch nearestPatch) ]
 
-
   ifelse first nearestSettlement < first nearestPatch
      [ report nearestSettlement ]
      [ report nearestPatch]
-;  report nearestPatch
-;  ask turtles with [color = col] [
-;   set temp distancexy x y
-;   if temp < first closest [
-;     show "closest, then temp"
-;     show first closest
-;     show temp
-;
-;     set closest (list temp self)
-;    ]
-;  ]
-;  report closest
+
 end
 
 
@@ -344,6 +323,7 @@ to setup-patches
     ]
   ]
 end
+
 
 to create-row [y]
   let x (boardSize - 1)
