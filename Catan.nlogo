@@ -9,7 +9,7 @@
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [validSpot rWood rBrick rWheat rSheep rVPoints]
+globals [validSpot weights rWood rBrick rWheat rSheep rVPoints]
 breed [ player1 red-player]
 breed [ player2 blue-player]
 breed [ player3 grey-player]
@@ -21,6 +21,7 @@ patches-own [ tileValue resourceType ]
 
 to setup
   ca
+  get-weights-from-file
   ;use this for just testing it
   set rWood 100
   set rBrick 100
@@ -34,7 +35,7 @@ end
 
 ; returns the array of weights to judge a spot by
 to-report settlement-weights
-  report (list 0.1 0.1 0.1 0.1 0.1 0.1)
+  report weights
 end
 
 ; This is where the dice rolls and the player turns will happen
@@ -42,8 +43,24 @@ to go
   display-labels ; get the patches to display their prob-values
   roll-dice ;Rolls dice and gives resources
   redturn
+
+;  show settlement-weights
+;  get-rules
 end
 
+;read the weights to use from file
+to get-weights-from-file
+  file-open "test_file_read.txt"   ;txt file here
+
+  set weights []
+  let val "err"
+  while[not file-at-end?][
+    set val file-read
+    set weights lput val weights
+
+  ]
+  file-close
+end
 
 ; Gives the patches labels for their roll values
 to display-labels
@@ -91,7 +108,7 @@ to redTurn
   [
     try-build-road buildNext
   ]
-;   show goal
+;  show goal
 ;  show buildFrom
 ;  show buildNext
 end
@@ -186,10 +203,10 @@ end
 to-report closest-structure [col]
   let x pxcor
   let y pycor
-  let nearestSettlement min-one-of turtles with [color = col] [distancexy x y]
+  let nearestSettlement min-one-of turtles with [color = col and not blocked-in patch-here] [distancexy x y]
   set nearestSettlement (list distance nearestSettlement nearestSettlement)
 
-  let nearestPatch min-one-of patches with [pcolor = col] [distancexy x y]
+  let nearestPatch min-one-of patches with [pcolor = col and not blocked-in self] [distancexy x y]
   ifelse nearestPatch = nobody
    [ set nearestPatch nearestSettlement ]
      [  set nearestPatch (list distance nearestPatch nearestPatch) ]
@@ -200,6 +217,17 @@ to-report closest-structure [col]
 
 end
 
+to-report blocked-in [pat]
+  let result true
+  ask pat[
+   ask neighbors4[
+     if is-valid-road[
+      set result false
+      ]
+    ]
+  ]
+  report result
+end
 
 ; Finds the expected production of a resource type (val)
 ; from a given patch
@@ -231,9 +259,9 @@ end
 
 ; Checks of a road can be built on
 to-report is-valid-road
-    if (pcolor != 1) [ ; out of bounds or other road there
-    report false
-  ]
+  if (pcolor != 1) or ; out of bounds or other road there
+     (any? turtles-on self) ; There is a settlement on this patch
+     [ report false ]
   report true
 end
 
@@ -412,6 +440,7 @@ to setup-turtles
 end
 
 
+
 to-report playerSurroundings ;surroundings of the players' settlement
 
   let listofpatches []
@@ -582,61 +611,6 @@ show-value?
 0
 1
 -1000
-
-MONITOR
-8
-224
-58
-269
-Bwood
-[wood] of player2
-17
-1
-11
-
-MONITOR
-62
-224
-112
-269
-Bbrick
-[brick] of player2
-17
-1
-11
-
-MONITOR
-118
-223
-168
-268
-Bwheat
-[wheat] of player2
-17
-1
-11
-
-MONITOR
-174
-222
-224
-267
-Bsheep
-[sheep] of player2
-17
-1
-11
-
-MONITOR
-233
-222
-310
-267
-B Vic-points
-[vPoints] of player2
-17
-1
-11
 
 CHOOSER
 177
@@ -1113,6 +1087,47 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment1" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="200"/>
+    <metric>rVPoints</metric>
+    <enumeratedValueSet variable="sheepProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="desertProbability">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redYstart">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="boardSize">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redXstart">
+      <value value="-5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-value?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueYstart">
+      <value value="-7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueXstart">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
