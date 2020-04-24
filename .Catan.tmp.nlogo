@@ -206,7 +206,7 @@ to give-resources
 end
 
 to setup-patches
-  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
+  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1) ;resize world depending on map size
   ask patches [
     let y (boardSize - 1)
     if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor 1]
@@ -918,6 +918,47 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment1" repetitions="1" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="200"/>
+    <metric>rVPoints</metric>
+    <enumeratedValueSet variable="sheepProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="desertProbability">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redYstart">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="boardSize">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redXstart">
+      <value value="-5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-value?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodProbability">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueYstart">
+      <value value="-7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueXstart">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
