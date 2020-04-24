@@ -27,7 +27,7 @@ to setup
   set rBrick 100
   set rWheat 100
   set rSheep 100
-
+;
   setup-patches
   setup-turtles
   display-labels
@@ -35,7 +35,7 @@ end
 
 ; returns the array of weights to judge a spot by
 to-report settlement-weights
-  report weights
+  report (list woodWeight brickWeight wheatweight sheepWeight distWeight)
 end
 
 ; This is where the dice rolls and the player turns will happen
@@ -85,32 +85,38 @@ to redTurn
 
   ;Find the closest structure to the goal to build from
   ask goal [
-   set buildFrom item 1 closest-structure red ; The closest structure to the goal
+   let temp closest-structure red
+   ifelse temp != nobody
+        [ set buildFrom item 1 closest-structure red ] ; The closest structure to the goal
+      [ set buildFrom nobody ]
+
   ]
 
-  ;Find the current structure we are building off of, find the patch we are building onto
-  ask buildFrom[
-    let closest (list 10000 self)
-    ask neighbors4[
-      let temp distance goal
-      if is-valid-road and temp < first closest [
-        set closest (list temp self)
+  if buildFrom != nobody[
+    ;Find the current structure we are building off of, find the patch we are building onto
+    ask buildFrom[
+      let closest (list 10000 self)
+      ask neighbors4[
+        let temp distance goal
+        if is-valid-road and temp < first closest [
+          set closest (list temp self)
+        ]
+        set buildNext item 1 closest
       ]
-     set buildNext item 1 closest
     ]
-  ]
 
-  ; If we are building onto the goal, build a settlement
-  ;otherwise, build a road
- ifelse buildNext = goal [
-    try-build-settlement buildNext
- ]
-  [
-    try-build-road buildNext
+    ; If we are building onto the goal, build a settlement
+    ;otherwise, build a road
+    ifelse buildNext = goal [
+      try-build-settlement buildNext
+    ]
+    [
+      try-build-road buildNext
+    ]
+    ;  show goal
+    ;  show buildFrom
+    ;  show buildNext
   ]
-;  show goal
-;  show buildFrom
-;  show buildNext
 end
 
 
@@ -192,9 +198,12 @@ to-report rate-settlement [col]
   let brickQual (find-resource orange * item 1 settlement-weights)
   let wheatQual (find-resource yellow * item 2 settlement-weights)
   let sheepQual (find-resource white * item 3 settlement-weights)
-  let dist (first closest-structure red * item 4 settlement-weights)
+  let dist closest-structure red
+  let distQual 0
+  if dist != nobody
+     [ set distQual (first dist * item 4 settlement-weights) ]
 
-  report woodQual + brickQual + wheatQual + sheepQual - dist
+  report woodQual + brickQual + wheatQual + sheepQual - distQual
 end
 
 
@@ -204,12 +213,22 @@ to-report closest-structure [col]
   let x pxcor
   let y pycor
   let nearestSettlement min-one-of turtles with [color = col and not blocked-in patch-here] [distancexy x y]
-  set nearestSettlement (list distance nearestSettlement nearestSettlement)
+  if nearestSettlement != nobody [
+    set nearestSettlement (list distance nearestSettlement nearestSettlement)
+  ]
 
   let nearestPatch min-one-of patches with [pcolor = col and not blocked-in self] [distancexy x y]
-  ifelse nearestPatch = nobody
-   [ set nearestPatch nearestSettlement ]
+  if nearestPatch != nobody
      [  set nearestPatch (list distance nearestPatch nearestPatch) ]
+
+  if nearestSettlement = nobody and nearestPatch = nobody [
+    report nobody
+  ]
+  if nearestSettlement = nobody
+    [ report nearestPatch ]
+;    [report nearestSettlement ]
+  if nearestPatch = nobody
+    [ report nearestSettlement ]
 
   ifelse first nearestSettlement < first nearestPatch
      [ report nearestSettlement ]
@@ -422,21 +441,21 @@ to setup-turtles
     ]
   ]
 
-  create-player2 1
-  [
-    set shape "house"
-    set color blue
-    set vPoints 0
-    setxy blueXstart blueYstart ;starting position
-    ask player2 [
-      foreach playerSurroundings [ [resource] ->
-        if(resource = "green") [set wood wood + 1]
-        if(resource = "orange") [set brick brick + 1]
-        if(resource = "yellow") [set wheat wheat + 1]
-        if(resource = "white") [set sheep sheep + 1]
-      ]
-    ]
-  ]
+;  create-player2 1
+;  [
+;    set shape "house"
+;    set color blue
+;    set vPoints 0
+;    setxy blueXstart blueYstart ;starting position
+;    ask player2 [
+;      foreach playerSurroundings [ [resource] ->
+;        if(resource = "green") [set wood wood + 1]
+;        if(resource = "orange") [set brick brick + 1]
+;        if(resource = "yellow") [set wheat wheat + 1]
+;        if(resource = "white") [set sheep sheep + 1]
+;      ]
+;    ]
+;  ]
 end
 
 
@@ -675,7 +694,7 @@ woodProbability
 woodProbability
 0
 100 - (desertProbability + brickProbability + wheatProbability + sheepProbability)
-24.0
+23.0
 1
 1
 NIL
@@ -690,7 +709,7 @@ brickProbability
 brickProbability
 0
 100 - (desertProbability + woodProbability + wheatProbability + sheepProbability)
-24.0
+23.0
 1
 1
 NIL
@@ -705,7 +724,7 @@ wheatProbability
 wheatProbability
 0
 100 - (desertProbability + brickProbability + woodProbability + sheepProbability)
-24.0
+23.0
 1
 1
 NIL
@@ -720,7 +739,7 @@ sheepProbability
 sheepProbability
 0
 100 - (desertProbability + brickProbability + wheatProbability + woodProbability)
-24.0
+23.0
 1
 1
 NIL
@@ -735,11 +754,66 @@ desertProbability
 desertProbability
 0
 100 - (brickProbability + wheatProbability + woodProbability + sheepProbability)
-4.0
+8.0
 1
 1
 NIL
 HORIZONTAL
+
+INPUTBOX
+9
+230
+81
+290
+woodWeight
+0.1
+1
+0
+Number
+
+INPUTBOX
+84
+230
+153
+290
+brickWeight
+0.1
+1
+0
+Number
+
+INPUTBOX
+155
+230
+227
+290
+wheatWeight
+0.1
+1
+0
+Number
+
+INPUTBOX
+230
+231
+305
+291
+sheepWeight
+0.1
+1
+0
+Number
+
+INPUTBOX
+238
+298
+301
+358
+distWeight
+0.1
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1091,7 +1165,7 @@ NetLogo 6.1.1
   <experiment name="experiment1" repetitions="5" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="200"/>
+    <timeLimit steps="100"/>
     <metric>rVPoints</metric>
     <enumeratedValueSet variable="sheepProbability">
       <value value="24"/>
@@ -1119,6 +1193,60 @@ NetLogo 6.1.1
     </enumeratedValueSet>
     <enumeratedValueSet variable="woodProbability">
       <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueYstart">
+      <value value="-7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueXstart">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment2" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="100"/>
+    <metric>rVPoints</metric>
+    <enumeratedValueSet variable="boardSize">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redYstart">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="desertProbability">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redXstart">
+      <value value="-5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="distWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-value?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatProbability">
+      <value value="23"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="blueYstart">
       <value value="-7"/>
