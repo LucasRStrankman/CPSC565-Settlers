@@ -22,7 +22,7 @@ patches-own [ tileValue resourceType ]
 to setup
   ca
   ;use this for just testing it
-  set rWood 100
+;  set rWood 100
   set rBrick 100
   set rWheat 100
   set rSheep 100
@@ -307,7 +307,7 @@ end
 
 
 to setup-patches
-  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1)
+  resize-world (-1 - boardSize) (boardSize + 1) (-1 - boardSize) (boardSize + 1) ;resize world depending on map size
   ask patches [
     let y (boardSize - 1)
     if ((not (pxcor mod 2 = 0)) or (not (pycor mod 2 = 0))) [set pcolor 1]
@@ -319,6 +319,7 @@ to setup-patches
       set y (y - 2)
     ]
     fix-tile-value ; 7 tileValue should only be for desert tiles
+    create-fixed-starting-resource
   ]
 end
 
@@ -335,6 +336,14 @@ to fix-tile-value
           (set tileValue (tileValue - randnum))
         ])
     ]
+end
+
+to create-fixed-starting-resource
+  let startValue 4
+  if ((pxcor = -2) and (pycor = 2))  [ set pcolor green set tileValue startValue]
+  if ((pxcor = -2) and (pycor = 0))  [ set pcolor orange set tileValue startValue]
+  if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set tileValue startValue]
+  if ((pxcor = 0) and (pycor = 0))  [ set pcolor white set tileValue startValue]
 end
 
 ; determines distribution of resources in the map using percentage as probability
@@ -394,21 +403,21 @@ to setup-turtles
     ]
   ]
 
-  create-player2 1
-  [
-    set shape "house"
-    set color blue
-    set vPoints 0
-    setxy blueXstart blueYstart ;starting position
-    ask player2 [
-      foreach playerSurroundings [ [resource] ->
-        if(resource = "green") [set wood wood + 1]
-        if(resource = "orange") [set brick brick + 1]
-        if(resource = "yellow") [set wheat wheat + 1]
-        if(resource = "white") [set sheep sheep + 1]
-      ]
-    ]
-  ]
+;  create-player2 1
+;  [
+;    set shape "house"
+;    set color blue
+;    set vPoints 0
+;    setxy blueXstart blueYstart ;starting position
+;    ask player2 [
+;      foreach playerSurroundings [ [resource] ->
+;        if(resource = "green") [set wood wood + 1]
+;        if(resource = "orange") [set brick brick + 1]
+;        if(resource = "yellow") [set wheat wheat + 1]
+;        if(resource = "white") [set sheep sheep + 1]
+;      ]
+;    ]
+;  ]
 end
 
 
@@ -654,7 +663,7 @@ INPUTBOX
 77
 136
 redXstart
--5.0
+-1.0
 1
 0
 Number
@@ -665,7 +674,7 @@ INPUTBOX
 136
 136
 redYstart
-5.0
+1.0
 1
 0
 Number
@@ -676,7 +685,7 @@ INPUTBOX
 246
 138
 blueXstart
-1.0
+0.0
 1
 0
 Number
@@ -687,7 +696,7 @@ INPUTBOX
 305
 138
 blueYstart
--7.0
+0.0
 1
 0
 Number
@@ -701,7 +710,7 @@ woodProbability
 woodProbability
 0
 100 - (desertProbability + brickProbability + wheatProbability + sheepProbability)
-24.0
+28.0
 1
 1
 NIL
@@ -716,7 +725,7 @@ brickProbability
 brickProbability
 0
 100 - (desertProbability + woodProbability + wheatProbability + sheepProbability)
-24.0
+28.0
 1
 1
 NIL
@@ -731,7 +740,7 @@ wheatProbability
 wheatProbability
 0
 100 - (desertProbability + brickProbability + woodProbability + sheepProbability)
-24.0
+20.0
 1
 1
 NIL
@@ -746,7 +755,7 @@ sheepProbability
 sheepProbability
 0
 100 - (desertProbability + brickProbability + wheatProbability + woodProbability)
-24.0
+20.0
 1
 1
 NIL
