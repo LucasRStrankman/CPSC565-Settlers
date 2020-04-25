@@ -1,0 +1,53 @@
+<experiments>
+  <experiment name="experiment4" repetitions="10" runMetricsEveryStep="false">
+  <setup>setup</setup>
+  <go>go</go>
+  <timeLimit steps="100"/>
+  <metric>rVPoints</metric>
+  <enumeratedValueSet variable="woodWeight">
+    <value value="0.06237331004191254"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="brickWeight">
+    <value value="1.1383973778176308"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="wheatWeight">
+    <value value="2.0978162348551437"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="sheepWeight">
+    <value value="0.04553737936621624"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="distWeight">
+    <value value="0.20500236745442074"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="woodProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="brickProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="desertProbability">
+    <value value="8"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="wheatProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="sheepProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="redYstart">
+    <value value="1"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="boardSize">
+    <value value="9"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="redXstart">
+    <value value="-1"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="show-details?">
+    <value value="false"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="show-value?">
+    <value value="true"/>
+  </enumeratedValueSet>
+  </experiment>
+  </experiments>

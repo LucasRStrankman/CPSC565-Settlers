@@ -15,10 +15,10 @@ GENERATION_RESULTS_FILE = "Generation_Results.csv"
 
 WRITE_FILE = "catanRunOutput.txt"
 GENERATIONS = 100 # number of generations to run
-FITNESS_RUNS = 5 # Number of runs in Netlogo per fitness evaluation
-POPULATION = 5 # Population per Generation
+FITNESS_RUNS = 10 # Number of runs in Netlogo per fitness evaluation
+POPULATION = 10 # Population per Generation
 sigma = 0.1 # noise standard deviation
-alpha = 0.1 # learning rate
+alpha = 0.05 # learning rate
 
 
 
@@ -93,64 +93,117 @@ def writeGen(gen, weights, fitness):
 
 # Create the Experiment file
 def writeNewSetup(path, w):
-    output = """<experiments>
-   <experiment name="exp" repetitions="{5}" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="200"/>
-    <metric>rVPoints</metric>
-    <enumeratedValueSet variable="desertProbability">
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sheepWeight">
-      <value value="{3}"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="redYstart">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="brickWeight">
-      <value value="{1}"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="redXstart">
-      <value value="-1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="boardSize">
-      <value value="9"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="woodProbability">
-      <value value="23"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="woodWeight">
-      <value value="{0}"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sheepProbability">
-      <value value="23"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="distWeight">
-      <value value="{4}"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="brickProbability">
-      <value value="23"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="wheatWeight">
-      <value value="{2}"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="show-value?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="wheatProbability">
-      <value value="23"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="blueYstart">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="blueXstart">
-      <value value="0"/>
-    </enumeratedValueSet>
+  output = """<experiments>
+  <experiment name="experiment4" repetitions="{5}" runMetricsEveryStep="false">
+  <setup>setup</setup>
+  <go>go</go>
+  <timeLimit steps="100"/>
+  <metric>rVPoints</metric>
+  <enumeratedValueSet variable="woodWeight">
+    <value value="{0}"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="brickWeight">
+    <value value="{1}"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="wheatWeight">
+    <value value="{2}"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="sheepWeight">
+    <value value="{3}"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="distWeight">
+    <value value="{4}"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="woodProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="brickProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="desertProbability">
+    <value value="8"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="wheatProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="sheepProbability">
+    <value value="23"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="redYstart">
+    <value value="1"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="boardSize">
+    <value value="9"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="redXstart">
+    <value value="-1"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="show-details?">
+    <value value="false"/>
+  </enumeratedValueSet>
+  <enumeratedValueSet variable="show-value?">
+    <value value="true"/>
+  </enumeratedValueSet>
   </experiment>
-</experiments>""".format(w[0], w[1], w[2], w[3], w[4], FITNESS_RUNS)
-    with open(path, "w") as f:
-        f.write(output)
+  </experiments>""".format(w[0], w[1], w[2], w[3], w[4], FITNESS_RUNS)
+#     output = """<experiments>
+#    <experiment name="exp" repetitions="{5}" runMetricsEveryStep="false">
+#     <setup>setup</setup>
+#     <go>go</go>
+#     <timeLimit steps="200"/>
+#     <metric>rVPoints</metric>
+#     <enumeratedValueSet variable="desertProbability">
+#       <value value="8"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="sheepWeight">
+#       <value value="{3}"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="redYstart">
+#       <value value="1"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="brickWeight">
+#       <value value="{1}"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="redXstart">
+#       <value value="-1"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="boardSize">
+#       <value value="9"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="woodProbability">
+#       <value value="23"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="woodWeight">
+#       <value value="{0}"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="sheepProbability">
+#       <value value="23"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="distWeight">
+#       <value value="{4}"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="brickProbability">
+#       <value value="23"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="wheatWeight">
+#       <value value="{2}"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="show-value?">
+#       <value value="true"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="wheatProbability">
+#       <value value="23"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="blueYstart">
+#       <value value="0"/>
+#     </enumeratedValueSet>
+#     <enumeratedValueSet variable="blueXstart">
+#       <value value="0"/>
+#     </enumeratedValueSet>
+#   </experiment>
+# </experiments>""".format(w[0], w[1], w[2], w[3], w[4], FITNESS_RUNS)
+  with open(path, "w") as f:
+    f.write(output)
 
 
 main()

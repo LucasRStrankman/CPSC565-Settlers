@@ -10,7 +10,7 @@ def f(w):
   return reward
 
 # hyperparameters
-npop = 50 # population size
+npop = 2 # population size
 sigma = 0.1 # noise standard deviation
 alpha = 0.001 # learning rate
 
@@ -27,5 +27,6 @@ for i in range(300):
     w_try = w + sigma*N[j] # jitter w using gaussian of sigma 0.1
     # print(w_try)
     R[j] = f(w_try) # evaluate the jittered version
+  print(R)
   A = (R - np.mean(R)) / np.std(R)
   w = w + alpha/(npop*sigma) * np.dot(N.T, A)
