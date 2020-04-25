@@ -3,73 +3,50 @@
 ; Winter 2020
 ; Catan Project
 
-
+; TILE LEGEND:
 ; GREEN -> WOOD
 ; ORANGE -> BRICK
 ; YELLOW -> WHEAT
 ; WHITE -> SHEEP
 
-globals [validSpot weights rWood rBrick rWheat rSheep rVPoints]
+globals [ turnNum weights rWood rBrick rWheat rSheep rVPoints]
 breed [ player1 red-player]
-breed [ player2 blue-player]
-breed [ player3 grey-player]
 
-turtles-own [ wood brick wheat sheep vPoints]
-;Victory Points
-
-patches-own [ tileValue resourceType ]
-
-to setup
-  ca
-  get-weights-from-file
-  ;use this for just testing it
-;  set rWood 100
-;  set rBrick 100
-;  set rWheat 100
-;  set rSheep 100
-
-  setup-patches
-  setup-turtles
-  display-labels
-end
+patches-own [ tileValue ]
 
 ; returns the array of weights to judge a spot by
 to-report settlement-weights
   report (list woodWeight brickWeight wheatweight sheepWeight distWeight)
 end
 
+to setup
+  ca
+  set turnNum 0
+  setup-patches
+  setup-turtles
+  display-labels
+end
+
+
+
 ; This is where the dice rolls and the player turns will happen
 to go
+  set turnNum turnNum + 1
+  if show-details? [type "Turn " print turnNum]
   display-labels ; get the patches to display their prob-values
   roll-dice ;Rolls dice and gives resources
   redturn
-
-;  show settlement-weights
-;  get-rules
 end
 
-;read the weights to use from file
-to get-weights-from-file
-  file-open "test_file_read.txt"   ;txt file here
 
-  set weights []
-  let val "err"
-  while[not file-at-end?][
-    set val file-read
-    set weights lput val weights
-
-  ]
-  file-close
-end
 
 ; Gives the patches labels for their roll values
 to display-labels
   ask patches [ set plabel "" set plabel-color black]
   if show-value? [
     ask patches [
-      if pcolor != 1 and pcolor != sky and pcolor != red[
-        set plabel tileValue
-      ]
+      if pcolor != 1 and pcolor != sky and pcolor != red
+        [ set plabel tileValue]
     ]
   ]
 end
@@ -78,10 +55,11 @@ end
 
 ; This defines what the red-player does
 to redTurn
-  ; Where it tries to build to next
-  let goal find-best-patch red
+
+  let goal find-best-patch red   ; Where it tries to build next settlement
   let buildFrom 0
   let buildNext 0
+
 
   ;Find the closest structure to the goal to build from
   ask goal [
@@ -92,6 +70,7 @@ to redTurn
 
   ]
 
+  ;Find the next spot to build on, on way to goal
   if buildFrom != nobody[
     ;Find the current structure we are building off of, find the patch we are building onto
     ask buildFrom[
@@ -105,22 +84,23 @@ to redTurn
       ]
     ]
 
+
     ; If we are building onto the goal, build a settlement
     ;otherwise, build a road
-    ifelse buildNext = goal [
-      try-build-settlement buildNext
+    ifelse buildNext = goal
+    [ try-build-settlement buildNext ]
+    [ try-build-road buildNext ]
+
+    if show-details?
+    [ type "Goal: " print goal
+      type "BuildFrom: " print buildFrom
+      type "BuildNext: " print buildNext
     ]
-    [
-      try-build-road buildNext
-    ]
-    ;  show goal
-    ;  show buildFrom
-    ;  show buildNext
   ]
 end
 
 
-;Currently only setup to work for Red
+;Builds a settlement if it has the resources
 to try-build-settlement [destination]
   if has-settlement-resources [
     set rWood rWood - 1
@@ -128,10 +108,16 @@ to try-build-settlement [destination]
     set rWheat rWheat - 1
     set rSheep rSheep - 1
     set rVPoints rVPoints + 1
-    create-red-settlement destination
-    ;ask destination [sprout-player1 1]
+;    create-red-settlement destination
+    ask destination [
+      sprout-player1 1 [
+        set shape "house"
+        set color red
+      ]
+    ]
   ]
 end
+
 
 
 ;Currently only setup to work for Red
@@ -168,9 +154,56 @@ to roll-dice
   ask patches [
     if tileValue = roll [
       give-resources pcolor
-      ;show pcolor
     ]
   ]
+  if show-details? [ type "Dice Roll: " print roll ]
+end
+
+; Makes a patch gives its resources to neighby settlements
+to give-resources [rType]
+  ask neighbors [
+   ask turtles-here [
+     (ifelse
+      rType = green [
+        set rWood rWood + 1
+      ]
+       rType = orange [
+        set rBrick rBrick + 1
+      ]
+       rType = yellow [
+        set rWheat rWheat + 1
+      ]
+       rType = white [
+        set rSheep rSheep + 1
+      ]
+       rType = brown or rType = 1 or rType = red [
+        ; do nothing, this is a desert or road
+      ])
+    ]
+  ]
+end
+
+
+; Helper for give-resources
+; Works to give to the correct player i.e. red vs. blue etc.
+to add-player-resources [rType]
+;  if color = red [ ; if it is a red settlement
+    (ifelse
+      rType = green [
+        set rWood rWood + 1
+      ]
+       rType = orange [
+        set rBrick rBrick + 1
+      ]
+       rType = yellow [
+        set rWheat rWheat + 1
+      ]
+       rType = white [
+        set rSheep rSheep + 1
+      ]
+       rType = brown or rType = 1 or rType = red [
+        ; do nothing, this is a desert or road
+      ])
 end
 
 
@@ -226,7 +259,6 @@ to-report closest-structure [col]
   ]
   if nearestSettlement = nobody
     [ report nearestPatch ]
-;    [report nearestSettlement ]
   if nearestPatch = nobody
     [ report nearestSettlement ]
 
@@ -236,17 +268,18 @@ to-report closest-structure [col]
 
 end
 
-to-report blocked-in [pat]
-  let result true
-  ask pat[
-   ask neighbors4[
-     if is-valid-road[
-      set result false
-      ]
-    ]
-  ]
-  report result
+
+
+
+; Finds the expected production of the tile
+to-report convert-tileValue [prob]
+  if (prob = 0 or prob = 10) [ report 1 ]
+  if (prob = 1 or prob = 9) [ report 2 ]
+  if (prob = 2 or prob = 8) [ report 3 ]
+  if (prob = 3 or prob = 7) [ report 4 ]
+  if (prob = 4 or prob = 5 or prob = 6) [ report 5 ] ; This is because we dont have a robber
 end
+
 
 ; Finds the expected production of a resource type (val)
 ; from a given patch
@@ -264,16 +297,7 @@ to-report find-resource [val]
 end
 
 
-; Finds the expected production of the tile
-to-report convert-tileValue [prob]
-  if (prob = 0 or prob = 10) [ report 1 ]
-  if (prob = 1 or prob = 9) [ report 2 ]
-  if (prob = 2 or prob = 8) [ report 3 ]
-  if (prob = 3 or prob = 7) [ report 4 ]
-  if (prob = 4 or prob = 5 or prob = 6) [ report 5 ] ; This is because we dont have a robber
-  ;report 0 ; this temp catch code
-  show prob
-end
+
 
 
 ; Checks of a road can be built on
@@ -312,44 +336,29 @@ to-report is-valid-settlement
 end
 
 
-
-; Makes a patch gives its resources to neighby settlements
-to give-resources [col]
-  ask neighbors [
-   ask turtles-here [
-     add-player-resources col
+to-report blocked-in [pat]
+  let result true
+  ask pat[
+   ask neighbors4[
+     if is-valid-road[
+      set result false
+      ]
     ]
   ]
-
+  report result
 end
 
 
-; Helper for give-resources
-; Works to give to the correct player i.e. red vs. blue etc.
-to add-player-resources [rType]
-  if color = red [ ; if it is a red settlement
-    (ifelse
-      rType = green [
-        set rWood rWood + 1
-      ]
-       rType = orange [
-        set rBrick rBrick + 1
-      ]
-       rType = yellow [
-        set rWheat rWheat + 1
-      ]
-       rType = white [
-        set rSheep rSheep + 1
-      ]
-       rType = brown or rType = 1 or rType = red [
-        ; do nothing, this is a desert or road
-      ]
-      [
-     ;   show rType
-      ;  show "Error in add-player-resources"
-      ])
+
+
+to setup-turtles
+   set RVPoints 1
+   create-player1 1
+  [
+    set shape "house"
+    set color red
+    setxy redXstart redYstart ;starting position
   ]
-  ; Copy this if we add other player colours
 end
 
 
@@ -370,6 +379,7 @@ to setup-patches
   ]
 end
 
+
 ; finds all resources with a 7 tile value and gives it a new non-7 tileValue
 to fix-tile-value
   if ((tileValue = 7) and (pcolor != brown) and ((pcolor != 1) or (pcolor != sky))) [
@@ -385,6 +395,7 @@ to fix-tile-value
     ]
 end
 
+
 to create-fixed-starting-resource
   let startValue 4
   if ((pxcor = -2) and (pycor = 2))  [ set pcolor green set tileValue startValue]
@@ -392,6 +403,7 @@ to create-fixed-starting-resource
   if ((pxcor = 0) and (pycor = 2))  [ set pcolor yellow set tileValue startValue]
   if ((pxcor = 0) and (pycor = 0))  [ set pcolor white set tileValue startValue]
 end
+
 
 ; determines distribution of resources in the map using percentage as probability
 to create-row [y]
@@ -423,104 +435,18 @@ to create-row [y]
 end
 
 
-to create-red-settlement [destination]
-  ask destination [
-      sprout-player1 1 [
-       set shape "house"
-      set color red
-    ]
-  ]
-end
-
-
-to setup-turtles
-   create-player1 1
-  [
-    set shape "house"
-    set color red
-    set vPoints 0
-    setxy redXstart redYstart ;starting position
-    ask player1 [
-      foreach playerSurroundings [ [resource] -> ;gives out initial resources (is this a rule? i forgot)
-         if(resource = "green") [set rWood rWood + 1]
-        if(resource = "orange") [set rBrick rBrick + 1]
-        if(resource = "yellow") [set rWheat rWheat + 1]
-        if(resource = "white") [set rSheep rSheep + 1]
-      ]
-    ]
-  ]
-
-;  create-player2 1
-;  [
-;    set shape "house"
-;    set color blue
-;    set vPoints 0
-;    setxy blueXstart blueYstart ;starting position
-;    ask player2 [
-;      foreach playerSurroundings [ [resource] ->
-;        if(resource = "green") [set wood wood + 1]
-;        if(resource = "orange") [set brick brick + 1]
-;        if(resource = "yellow") [set wheat wheat + 1]
-;        if(resource = "white") [set sheep sheep + 1]
-;      ]
-;    ]
-;  ]
-end
 
 
 
-to-report playerSurroundings ;surroundings of the players' settlement
-
-  let listofpatches []
-  ;starts at NE and moves clockwise
-  ;NE
-  if [pcolor] of patch-at 1 1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at 1 1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at 1 1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at 1 1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;SE
-  if [pcolor] of patch-at 1 -1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at 1 -1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at 1 -1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at 1 -1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;SW
-  if [pcolor] of patch-at -1 -1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at -1 -1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at -1 -1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at -1 -1 = white [
-  set listofpatches lput "white" listofpatches]
-  ;NW
-  if [pcolor] of patch-at -1 1 = green [
-  set listofpatches lput "green" listofpatches]
-  if [pcolor] of patch-at -1 1 = orange [
-  set listofpatches lput "orange" listofpatches]
-  if [pcolor] of patch-at -1 1 = yellow [
-  set listofpatches lput "yellow" listofpatches]
-  if [pcolor] of patch-at -1 1 = white [
-  set listofpatches lput "white" listofpatches]
-
-  report listofpatches
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
-351
-10
-884
-544
+411
+17
+975
+582
 -1
 -1
-25.0
+26.5
 1
 10
 1
@@ -541,10 +467,10 @@ ticks
 30.0
 
 BUTTON
-17
-23
-80
-56
+48
+19
+111
+52
 setup
 setup
 NIL
@@ -558,13 +484,13 @@ NIL
 1
 
 BUTTON
-94
-24
-157
-57
+123
+19
+186
+52
 go
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -630,10 +556,10 @@ rVPoints
 11
 
 SWITCH
-18
-335
-170
-368
+14
+363
+166
+396
 show-value?
 show-value?
 0
@@ -641,10 +567,10 @@ show-value?
 -1000
 
 CHOOSER
-177
-18
-315
-63
+152
+82
+290
+127
 boardSize
 boardSize
 9 11
@@ -672,33 +598,11 @@ redYstart
 0
 Number
 
-INPUTBOX
-186
-78
-246
-138
-blueXstart
-0.0
-1
-0
-Number
-
-INPUTBOX
-245
-78
-305
-138
-blueYstart
-0.0
-1
-0
-Number
-
 SLIDER
-17
-375
-189
-408
+195
+319
+367
+352
 woodProbability
 woodProbability
 0
@@ -710,10 +614,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-17
-407
-189
-440
+195
+351
+367
+384
 brickProbability
 brickProbability
 0
@@ -725,10 +629,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-17
-439
-189
-472
+195
+383
+367
+416
 wheatProbability
 wheatProbability
 0
@@ -740,10 +644,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-17
-471
-189
-504
+195
+415
+367
+448
 sheepProbability
 sheepProbability
 0
@@ -755,10 +659,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-17
-503
-189
-536
+195
+447
+367
+480
 desertProbability
 desertProbability
 0
@@ -804,9 +708,9 @@ Number
 
 INPUTBOX
 230
-231
+230
 305
-291
+290
 sheepWeight
 0.1
 1
@@ -814,52 +718,85 @@ sheepWeight
 Number
 
 INPUTBOX
-238
-298
-301
-358
+312
+231
+375
+291
 distWeight
 0.1
 1
 0
 Number
 
+SWITCH
+13
+328
+166
+361
+show-details?
+show-details?
+1
+1
+-1000
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+A basic implementation of the board game Settlers of Catan in a square grid. The agent chooses which where to build its next settlement based on weights that are provided. It rates the settlement positions based on the amount and types of resources it provides and the distance to reach that position.
+
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+Each turn two random dice are rolled, going from 0-5. The sums of their values allow the tiles with those labels to produce 1 resource to adjacent settlements. 
+
+The agent scans the board and chooses the best next position to build a settlement on. When it has the resources to do so, it will build a road toward that goal, or build a settlement if it would build on that goal.
+
+Green tiles produce Wood
+Orange tiles produce Brick
+Yellow tiles produce Wheat
+White tiles produce Sheep
+
+A road costs 1 Wood and 1 Brick
+A settlement costs 1 of each resource
+
+The first settlement always spawns with one of each resource beside it to avoid deadlock
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Click setup to create a random boad state. Click go to advance each turn or set it to run forever to see it quickly cover the board.
+
+The probability sliders affect the initial setup. You can change how likely each resource is to spawn to see different behaviours
+
+Enter different weights to adjust what the agent prioritizes (higher values means it cares more about this)
+
+You can adjust the board size to try the modal with different sizes
+
+The show-display toggle displays the Roll number for each resource tile
+
+The show-detail toggle causes the model to display more detail about the turn to the console
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+The agent will build very slowly to begin with, but can quite quickly expload in action after getting a few settlements down. Different parameters will cause it to achieve this growth faster or slower depending on what it values.
+
+The Wood, Brick, and Distance parameters are particularly important, a very low distance will cause it to seek out the highest-producing tiles.
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Try playing with high and low distance weights to see it cross the map to get another resource.
+Try putting in negative values to cause it to avoid tiles of a certain type.
+You can also change the setup to make certain resouces scare, then change how much the model values that resource.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+An extension could be to change build costs of roads and settlements, such as making it cost more wood and brick to build a road, or that a settlement might need 5 Sheep and 1 of everything else.
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+Netlogo doesn't have built in path-finding abilities, so to find the nearest building point to a goal we used direct distance and found the nearest valid buildable tile.
 
-## RELATED MODELS
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
 
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
 @#$#@#$#@
 default
 true
@@ -1262,6 +1199,111 @@ NetLogo 6.1.1
     </enumeratedValueSet>
     <enumeratedValueSet variable="blueXstart">
       <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment3" repetitions="3" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="100"/>
+    <metric>rVPoints</metric>
+    <enumeratedValueSet variable="desertProbability">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redYstart">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redXstart">
+      <value value="-1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="boardSize">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="distWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-value?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueYstart">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="blueXstart">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment4" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="100"/>
+    <metric>rVPoints</metric>
+    <enumeratedValueSet variable="woodWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="distWeight">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="woodProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="brickProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="desertProbability">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="wheatProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sheepProbability">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redYstart">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="boardSize">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redXstart">
+      <value value="-1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-details?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-value?">
+      <value value="true"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
