@@ -146,62 +146,6 @@ def writeNewSetup(path, w):
   </enumeratedValueSet>
   </experiment>
   </experiments>""".format(w[0], w[1], w[2], w[3], w[4], FITNESS_RUNS)
-#     output = """<experiments>
-#    <experiment name="exp" repetitions="{5}" runMetricsEveryStep="false">
-#     <setup>setup</setup>
-#     <go>go</go>
-#     <timeLimit steps="200"/>
-#     <metric>rVPoints</metric>
-#     <enumeratedValueSet variable="desertProbability">
-#       <value value="8"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="sheepWeight">
-#       <value value="{3}"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="redYstart">
-#       <value value="1"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="brickWeight">
-#       <value value="{1}"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="redXstart">
-#       <value value="-1"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="boardSize">
-#       <value value="9"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="woodProbability">
-#       <value value="23"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="woodWeight">
-#       <value value="{0}"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="sheepProbability">
-#       <value value="23"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="distWeight">
-#       <value value="{4}"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="brickProbability">
-#       <value value="23"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="wheatWeight">
-#       <value value="{2}"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="show-value?">
-#       <value value="true"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="wheatProbability">
-#       <value value="23"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="blueYstart">
-#       <value value="0"/>
-#     </enumeratedValueSet>
-#     <enumeratedValueSet variable="blueXstart">
-#       <value value="0"/>
-#     </enumeratedValueSet>
-#   </experiment>
-# </experiments>""".format(w[0], w[1], w[2], w[3], w[4], FITNESS_RUNS)
   with open(path, "w") as f:
     f.write(output)
 
