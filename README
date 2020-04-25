@@ -1,0 +1,26 @@
+Evolving Settlers of Catan in Netlogo
+CPSC 565 Winter 2020
+Lucas Ramos-Strankman, Vince Derayunan, Najia Wange
+
+
+This is an Evolutionary Strategy to find the optimal settlement locations on a Catan board
+by looking at Resource types, Resource outputs, and Distance to the build point
+
+SETUP
+This uses a bashscript to call Netlogo-headless from inside a python script,
+so you must be running a Unix system to operate
+
+To run you must first install Netlogo and Java. Then open up ES-Catan.py and 
+put in the absolute path to your Netlogo installation and the location for the
+Catan Netlogo model
+
+Afterwards you can call "python ES-Catan.py" to start it running.
+You may see the console output 
+"JAVA_HOME undefined, using java from path. For control over exact java version, set JAVA_HOME"
+The ES will still run properly, this is given by netlogo-headless. To remove this warning
+follow the steps given on the Netlogo Behaviour Space documentation to add a 
+JAVA_HOME variable
+
+http://ccl.northwestern.edu/netlogo/docs/behaviorspace.html#examples
+
+The ES will output the values of each run to a csv to see for later use
